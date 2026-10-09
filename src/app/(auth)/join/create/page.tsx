@@ -10,18 +10,13 @@ import { env } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Crea tu familia · Métricas Bebé" };
 
+// The form draws its own header: the title and the back control follow the
+// wizard step, which lives in the URL (?step=baby, decision 071).
 export default function CreateHouseholdPage(): ReactNode {
   return (
-    <>
-      <PageHeader
-        backHref="/join"
-        title="Crea tu familia"
-        description="Después podrás invitar al otro progenitor."
-      />
-      <Suspense fallback={<FormSkeleton fields={3} />}>
-        <CreateHouseholdSection />
-      </Suspense>
-    </>
+    <Suspense fallback={<CreateHouseholdSkeleton />}>
+      <CreateHouseholdSection />
+    </Suspense>
   );
 }
 
@@ -32,4 +27,13 @@ async function CreateHouseholdSection(): Promise<ReactNode> {
   const today = formatDateInputValue(new Date(), env.APP_TIMEZONE);
 
   return <CreateHouseholdForm maxBirthDate={today} />;
+}
+
+function CreateHouseholdSkeleton(): ReactNode {
+  return (
+    <>
+      <PageHeader backHref="/join" title="Crea tu familia" />
+      <FormSkeleton fields={1} />
+    </>
+  );
 }
