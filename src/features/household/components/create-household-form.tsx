@@ -109,6 +109,12 @@ export function CreateHouseholdForm({
 
   return (
     <FormProvider {...form}>
+      {/* Focus jumps to the new step's field; this says which step it is.
+          Present from the first render, so loading the page announces
+          nothing. */}
+      <p role="status" className="sr-only">
+        {step === "you" ? "Paso 1 de 2: tú." : "Paso 2 de 2: tu bebé."}
+      </p>
       {step === "you" ? (
         <PageHeader
           backHref="/join"
