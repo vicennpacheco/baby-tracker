@@ -66,7 +66,8 @@ const getBabyForHousehold = cache(getPrimaryBaby);
 
 /**
  * Entry point of every module page: the member plus the household's baby.
- * Same redirect rules as requireMember(); call it outside try/catch.
+ * Same redirect rules as requireMember(), and throws if the household has no
+ * baby; call it outside try/catch.
  */
 export async function requireBaby(): Promise<{
   member: Member;
@@ -74,8 +75,13 @@ export async function requireBaby(): Promise<{
 }> {
   const member = await requireMember();
   const baby = await getBabyForHousehold(member.householdId);
-  // Until "create baby" exists (phase 2, task 2), go back to /join.
-  if (!baby) redirect("/join");
+  // createHousehold inserts the baby with the household (decision 044), so a
+  // household without one is corrupt data, not an onboarding step. Throwing
+  // surfaces it in the segment's error.tsx and the server log; a redirect would
+  // hide it, and would loop once "/" (the dashboard) needs the baby too.
+  if (!baby) {
+    throw new Error(`Household ${member.householdId} has no baby`);
+  }
 
   return { member, baby };
 }

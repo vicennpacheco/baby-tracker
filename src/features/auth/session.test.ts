@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -97,12 +98,13 @@ describe("requireNoHousehold", () => {
 });
 
 describe("requireBaby", () => {
-  it("redirects when the household has no baby yet", async () => {
+  it("fails loudly, without redirecting, when the household has no baby", async () => {
     getClaims.mockResolvedValue(SIGNED_IN);
     getMemberByUserId.mockResolvedValue(MEMBER);
     getPrimaryBaby.mockResolvedValue(null);
-    await expect(requireBaby()).rejects.toThrow("REDIRECT:/join");
+    await expect(requireBaby()).rejects.toThrow("Household h1 has no baby");
     expect(getPrimaryBaby).toHaveBeenCalledWith("h1");
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("returns the member and the household's baby", async () => {
