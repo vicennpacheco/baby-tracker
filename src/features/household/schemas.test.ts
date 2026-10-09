@@ -23,6 +23,15 @@ const VALID_HOUSEHOLD = {
 };
 
 describe("createHouseholdSchema", () => {
+  it.each(["FEMALE", "MALE", undefined])(
+    "accepts the baby's sex %s, optional (decision 069)",
+    (babySex) => {
+      expect(
+        createHouseholdSchema.parse({ ...VALID_HOUSEHOLD, babySex }).babySex,
+      ).toBe(babySex);
+    },
+  );
+
   it("trims names and keeps the date as YYYY-MM-DD", () => {
     expect(createHouseholdSchema.parse(VALID_HOUSEHOLD)).toMatchObject({
       displayName: "Ana",

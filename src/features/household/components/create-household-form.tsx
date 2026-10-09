@@ -9,13 +9,14 @@ import { FormFooter } from "@/components/shared/form-footer";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { TextField } from "@/components/shared/text-field";
 import { createHousehold } from "@/features/household/actions";
+import { BabySexField } from "@/features/household/components/baby-sex-field";
 import {
   createHouseholdSchema,
   type CreateHouseholdInput,
 } from "@/features/household/schemas";
 import { applyFieldErrors } from "@/lib/forms";
 
-const FIELDS = ["displayName", "babyName", "babyBirthDate"] as const;
+const FIELDS = ["displayName", "babyName", "babyBirthDate", "babySex"] as const;
 
 type CreateHouseholdFormProps = {
   /** Today in the household time zone ("2026-10-08"), computed on the server. */
@@ -98,6 +99,18 @@ export function CreateHouseholdForm({
             type="date"
             max={maxBirthDate}
             label="Fecha de nacimiento"
+            error={fieldState.error?.message}
+          />
+        )}
+      />
+      <Controller
+        name="babySex"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <BabySexField
+            name={field.name}
+            value={field.value}
+            onChange={field.onChange}
             error={fieldState.error?.message}
           />
         )}
