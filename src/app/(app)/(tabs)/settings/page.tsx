@@ -7,7 +7,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ThemeChoice } from "@/components/shared/theme-choice";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { requireMember } from "@/features/auth/session";
+import { requireBaby, requireMember } from "@/features/auth/session";
+import { BabyCard } from "@/features/household/components/baby-card";
 import { MemberList } from "@/features/household/components/member-list";
 import { RevokeInviteButton } from "@/features/household/components/revoke-invite-button";
 import {
@@ -15,7 +16,11 @@ import {
   listHouseholdMembers,
 } from "@/features/household/queries";
 import { MAX_HOUSEHOLD_MEMBERS } from "@/features/household/service";
-import { formatRelativeDayTime } from "@/lib/dates";
+import {
+  formatBabyAge,
+  formatRelativeDayTime,
+  formatShortDate,
+} from "@/lib/dates";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +31,10 @@ export default function SettingsPage(): ReactNode {
     <>
       <PageHeader backHref="/more" title="Ajustes" />
       <div className="flex flex-col gap-8">
-        <Suspense fallback={<FamilySkeleton />}>
+        <Suspense fallback={<SectionSkeleton rows={1} />}>
+          <BabySection />
+        </Suspense>
+        <Suspense fallback={<SectionSkeleton rows={2} />}>
           <FamilySection />
         </Suspense>
         <section
@@ -40,6 +48,20 @@ export default function SettingsPage(): ReactNode {
         </section>
       </div>
     </>
+  );
+}
+
+async function BabySection(): Promise<ReactNode> {
+  const { baby } = await requireBaby();
+  const now = new Date();
+  const timeZone = env.APP_TIMEZONE;
+
+  return (
+    <BabyCard
+      name={baby.name}
+      age={formatBabyAge(baby.birthDate, now, timeZone)}
+      birthDate={formatShortDate(baby.birthDate, now, timeZone)}
+    />
   );
 }
 
@@ -93,12 +115,13 @@ async function FamilySection(): Promise<ReactNode> {
   );
 }
 
-function FamilySkeleton(): ReactNode {
+function SectionSkeleton({ rows }: { rows: number }): ReactNode {
   return (
     <div role="status" aria-label="Cargando" className="flex flex-col gap-3">
       <Skeleton className="h-7 w-24" />
-      <Skeleton className="h-14 w-full rounded-xl" />
-      <Skeleton className="h-14 w-full rounded-xl" />
+      {Array.from({ length: rows }, (_, index) => (
+        <Skeleton key={index} className="h-16 w-full rounded-xl" />
+      ))}
     </div>
   );
 }
