@@ -21,12 +21,14 @@
 - [x] 4. `hasAnyRecord(babyId)` en `features/dashboard`, con test de integración y prueba de mutación del filtro.
 - [x] 5. Tarjeta de bienvenida («Todo listo para …» con «Primer pañal», «Primera toma», «Primera siesta»), solo hoy y sin registros; oculta el resumen a cero.
 
-- [ ] QA del usuario: bienvenida con un bebé sin registros, accesos a cada módulo, resumen oculto hasta el primer registro.
+- [x] QA del usuario: bienvenida con un bebé sin registros, accesos a cada módulo, resumen oculto hasta el primer registro.
 
 ## Ronda 3 · Editar los datos del bebé
 
-- [ ] 6. `updateBaby` (los dos miembros, Zod, `assertBabyInHousehold`), con tests de integración y prueba de mutación.
-- [ ] 7. Pantalla `/settings/baby` y tarjeta «Tu bebé» en Ajustes.
+- [x] 6. `updateBaby` (los dos miembros, Zod, `assertBabyInHousehold`), con tests de integración y prueba de mutación.
+- [x] 7. Pantalla `/settings/baby` y tarjeta «Tu bebé» en Ajustes.
+
+- [ ] QA del usuario: editar nombre, fecha y sexo (también «Prefiero no decirlo»), desde los dos móviles; la tarjeta «Tu bebé» con la edad.
 
 ## Ronda 4 · Salir y eliminar la familia
 
