@@ -14,12 +14,14 @@
 - [x] 1. `feat(household): ask the baby's sex, optional`: «Niña · Niño · Prefiero no decirlo» (`null`), `BabySexField` y tests (decisión 069).
 - [x] 2. `feat(household): create the family in two steps`: asistente con `?step=baby` y `pushState`, un solo envío, `PageHeader.onBack`.
 - [x] 3. `fix(household): announce the wizard step to screen readers` (revisión de accesibilidad).
-- [ ] QA del usuario: asistente, botón atrás del sistema y de la cabecera, recarga en el paso 2, sexo opcional.
+- [x] QA del usuario: asistente, botón atrás del sistema y de la cabecera, recarga en el paso 2, sexo opcional.
 
 ## Ronda 2 · Estado de primer uso en «Hoy»
 
-- [ ] 4. `hasAnyRecord(babyId)` en `features/dashboard`, con test de integración y prueba de mutación del filtro.
-- [ ] 5. Tarjeta de bienvenida («Todo listo para …» con «Primer pañal», «Primera toma», «Primera siesta»), solo hoy y sin registros; oculta el resumen a cero.
+- [x] 4. `hasAnyRecord(babyId)` en `features/dashboard`, con test de integración y prueba de mutación del filtro.
+- [x] 5. Tarjeta de bienvenida («Todo listo para …» con «Primer pañal», «Primera toma», «Primera siesta»), solo hoy y sin registros; oculta el resumen a cero.
+
+- [ ] QA del usuario: bienvenida con un bebé sin registros, accesos a cada módulo, resumen oculto hasta el primer registro.
 
 ## Ronda 3 · Editar los datos del bebé
 
