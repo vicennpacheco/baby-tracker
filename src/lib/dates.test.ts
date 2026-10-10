@@ -8,6 +8,7 @@ import {
   formatElapsed,
   formatDateInputValue,
   formatDateTimeLocalValue,
+  formatBabyAge,
   formatDayLabel,
   formatDuration,
   formatRelativeDayTime,
@@ -344,5 +345,30 @@ describe("formatShortDate", () => {
     expect(formatShortDate(new Date("2026-09-30T23:30:00Z"), NOW, MADRID)).toBe(
       "1 oct",
     );
+  });
+});
+
+describe("formatBabyAge", () => {
+  // Birth dates are stored as the household-local midnight (parseDateOnly).
+  const born = (date: string): Date => {
+    const parsed = parseDateOnly(date, MADRID);
+    if (!parsed) throw new Error(`Bad test date ${date}`);
+    return parsed;
+  };
+  const NOW = new Date("2026-10-09T10:00:00Z");
+
+  it.each([
+    ["2026-10-09", "Su primer día"],
+    ["2026-10-08", "1 día"],
+    ["2026-09-26", "13 días"],
+    ["2026-09-25", "2 semanas"],
+    ["2026-08-15", "7 semanas"],
+    ["2026-08-09", "2 meses"],
+    ["2025-11-09", "11 meses"],
+    ["2024-10-10", "23 meses"],
+    ["2024-10-09", "2 años"],
+    ["2024-09-09", "2 años y 1 mes"],
+  ])("born on %s reads %s", (birthDate, expected) => {
+    expect(formatBabyAge(born(birthDate), NOW, MADRID)).toBe(expected);
   });
 });

@@ -1,5 +1,11 @@
 import { TZDate } from "@date-fns/tz";
-import { addDays, format, startOfDay } from "date-fns";
+import {
+  addDays,
+  differenceInCalendarDays,
+  differenceInMonths,
+  format,
+  startOfDay,
+} from "date-fns";
 import { es } from "date-fns/locale";
 
 // All date logic takes the household time zone explicitly (env.APP_TIMEZONE on
@@ -162,6 +168,33 @@ export function formatShortDate(
   const isThisYear =
     date.getFullYear() === new TZDate(now, timeZone).getFullYear();
   return format(date, isThisYear ? "d MMM" : "d MMM yyyy", { locale: es });
+}
+
+function countLabel(count: number, singular: string, plural: string): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+/**
+ * A baby's age the way a paediatrician says it: days for two weeks, weeks
+ * until two months, months until two years, then years and months. Read on
+ * the household calendar (§2.5); the birth date is its local midnight.
+ */
+export function formatBabyAge(
+  birthDate: Date,
+  now: Date,
+  timeZone: string,
+): string {
+  const born = new TZDate(birthDate, timeZone);
+  const today = new TZDate(now, timeZone);
+  const days = differenceInCalendarDays(today, born);
+  if (days <= 0) return "Su primer día";
+  if (days < 14) return countLabel(days, "día", "días");
+  if (days < 56) return countLabel(Math.floor(days / 7), "semana", "semanas");
+  const months = differenceInMonths(today, born);
+  if (months < 24) return countLabel(months, "mes", "meses");
+  const years = countLabel(Math.floor(months / 12), "año", "años");
+  const rest = months % 12;
+  return rest === 0 ? years : `${years} y ${countLabel(rest, "mes", "meses")}`;
 }
 
 /** "25 min", "1 h", "1 h 20 min". Negative durations read as "0 min". */
