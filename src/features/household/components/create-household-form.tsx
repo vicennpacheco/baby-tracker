@@ -18,7 +18,7 @@ import { FormFooter } from "@/components/shared/form-footer";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { TextField } from "@/components/shared/text-field";
 import { createHousehold } from "@/features/household/actions";
-import { BabyStepFields } from "@/features/household/components/baby-step-fields";
+import { BabyFields } from "@/features/household/components/baby-fields";
 import {
   createHouseholdSchema,
   type CreateHouseholdInput,
@@ -150,7 +150,7 @@ export function CreateHouseholdForm({
             )}
           />
         ) : (
-          <BabyStepFields maxBirthDate={maxBirthDate} />
+          <BabyFields maxBirthDate={maxBirthDate} />
         )}
         <FormFooter>
           <SubmitButton isPending={isPending} pendingLabel="Creando…">

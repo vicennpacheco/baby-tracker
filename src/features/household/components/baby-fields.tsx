@@ -7,14 +7,23 @@ import { TextField } from "@/components/shared/text-field";
 import { BabySexField } from "@/features/household/components/baby-sex-field";
 import type { CreateHouseholdInput } from "@/features/household/schemas";
 
-/** Step 2 of creating the family: the baby (FormProvider). */
-export function BabyStepFields({
+/** The baby fields shared by family creation and the baby edit screen. */
+type BabyFieldValues = Pick<
+  CreateHouseholdInput,
+  "babyName" | "babyBirthDate" | "babySex"
+>;
+
+/**
+ * Name, birth date and optional sex of the baby (FormProvider): step 2 of
+ * creating the family and the baby edit screen, with the same rules.
+ */
+export function BabyFields({
   maxBirthDate,
 }: {
   /** Today in the household time zone, computed on the server. */
   maxBirthDate: string;
 }): ReactNode {
-  const { control } = useFormContext<CreateHouseholdInput>();
+  const { control } = useFormContext<BabyFieldValues>();
 
   return (
     <>
