@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { getDailySummary } from "@/features/dashboard/queries";
+import { getDailySummary, hasAnyRecord } from "@/features/dashboard/queries";
 import { getDayRange } from "@/lib/dates";
 import {
   createBaby,
   createDiaperChange,
   createFamily,
   createFeeding,
+  createGrowthMeasurement,
+  createHealthRecord,
   createSleepSession,
 } from "@/test/factories";
 
@@ -89,5 +91,33 @@ describe("getDailySummary", () => {
     const summary = await getDailySummary(family.babyId, OCT_1);
 
     expect(summary.diapers.total).toBe(0);
+  });
+});
+
+describe("hasAnyRecord", () => {
+  it("is false for a baby without any record yet", async () => {
+    const family = await createFamily();
+    await expect(hasAnyRecord(family.babyId)).resolves.toBe(false);
+  });
+
+  it.each([
+    ["a diaper", createDiaperChange],
+    ["a feeding", createFeeding],
+    ["a sleep", createSleepSession],
+    ["a growth measurement", createGrowthMeasurement],
+    ["a health record", createHealthRecord],
+  ] as const)("is true once there is %s", async (_kind, create) => {
+    const family = await createFamily();
+    await create(family.babyId, { createdById: family.userId });
+
+    await expect(hasAnyRecord(family.babyId)).resolves.toBe(true);
+  });
+
+  it("never counts a sibling's records", async () => {
+    const family = await createFamily();
+    const sibling = await createBaby(family.householdId);
+    await createFeeding(sibling.babyId, { createdById: family.userId });
+
+    await expect(hasAnyRecord(family.babyId)).resolves.toBe(false);
   });
 });
