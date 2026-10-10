@@ -6,9 +6,10 @@ import { DayNav } from "@/components/shared/day-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireBaby } from "@/features/auth/session";
 import { DaySummary } from "@/features/dashboard/components/day-summary";
+import { FirstUseCard } from "@/features/dashboard/components/first-use-card";
 import { LastFeedingCard } from "@/features/dashboard/components/last-feeding-card";
 import { RunningTimers } from "@/features/dashboard/components/running-timers";
-import { getDailySummary } from "@/features/dashboard/queries";
+import { getDailySummary, hasAnyRecord } from "@/features/dashboard/queries";
 import {
   describeLastFeeding,
   FEEDING_TYPE_LABELS,
@@ -62,16 +63,25 @@ async function TodaySection({
   );
   // Past days show the summary only (decision D4); one parallel batch.
   const today = day.isToday;
-  const [summary, members, last, lastBreast, feeding, sleep, growth] =
-    await Promise.all([
-      getDailySummary(baby.id, day.range, now),
-      listHouseholdMembers(member.householdId),
-      today ? getLastFeeding(baby.id) : null,
-      today ? getLastBreastFeeding(baby.id) : null,
-      today ? getActiveFeeding(baby.id) : null,
-      today ? getActiveSleepSession(baby.id) : null,
-      today ? getLatestGrowthMeasurement(baby.id) : null,
-    ]);
+  const [
+    summary,
+    members,
+    last,
+    lastBreast,
+    feeding,
+    sleep,
+    growth,
+    hasRecords,
+  ] = await Promise.all([
+    getDailySummary(baby.id, day.range, now),
+    listHouseholdMembers(member.householdId),
+    today ? getLastFeeding(baby.id) : null,
+    today ? getLastBreastFeeding(baby.id) : null,
+    today ? getActiveFeeding(baby.id) : null,
+    today ? getActiveSleepSession(baby.id) : null,
+    today ? getLatestGrowthMeasurement(baby.id) : null,
+    today ? hasAnyRecord(baby.id) : true,
+  ]);
   const names = authorNamesOf(members);
   const byWhom = (userId: string): string | null =>
     authorLabel(userId, member.userId, names);
@@ -83,6 +93,8 @@ async function TodaySection({
         label={formatDayLabel(day, now, timeZone)}
         {...dayNavProps("/", day, now, timeZone)}
       />
+      {/* First use: a welcome instead of a summary of zeros. */}
+      {!hasRecords && <FirstUseCard babyName={baby.name} />}
       {today && members.length < MAX_HOUSEHOLD_MEMBERS && <InvitePartnerCard />}
       <RunningTimers
         serverNow={serverNow}
@@ -120,19 +132,21 @@ async function TodaySection({
           }
         />
       )}
-      <DaySummary
-        summary={summary}
-        isToday={today}
-        dayQuery={today ? "" : `?day=${day.date}`}
-        latestWeight={
-          growth?.weightGrams != null
-            ? {
-                value: formatWeight(growth.weightGrams),
-                detail: `Último peso, ${formatShortDate(growth.measuredAt, now, timeZone)}`,
-              }
-            : null
-        }
-      />
+      {hasRecords && (
+        <DaySummary
+          summary={summary}
+          isToday={today}
+          dayQuery={today ? "" : `?day=${day.date}`}
+          latestWeight={
+            growth?.weightGrams != null
+              ? {
+                  value: formatWeight(growth.weightGrams),
+                  detail: `Último peso, ${formatShortDate(growth.measuredAt, now, timeZone)}`,
+                }
+              : null
+          }
+        />
+      )}
     </div>
   );
 }
