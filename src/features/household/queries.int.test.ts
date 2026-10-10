@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getBabyProfile,
   getPendingInvite,
   listHouseholdMembers,
 } from "@/features/household/queries";
@@ -59,5 +60,24 @@ describe("getPendingInvite", () => {
       createdById: theirs.userId,
     });
     expect(await getPendingInvite(mine.householdId)).toBeNull();
+  });
+});
+
+describe("getBabyProfile", () => {
+  it("gives the household's baby, sex included", async () => {
+    const family = await createFamily();
+
+    await expect(
+      getBabyProfile(family.babyId, family.householdId),
+    ).resolves.toMatchObject({ id: family.babyId, sex: null });
+  });
+
+  it("never returns another household's baby", async () => {
+    const family = await createFamily();
+    const other = await createFamily();
+
+    await expect(
+      getBabyProfile(other.babyId, family.householdId),
+    ).resolves.toBeNull();
   });
 });

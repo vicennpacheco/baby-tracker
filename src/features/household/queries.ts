@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { HouseholdRole } from "@/generated/prisma/client";
+import type { BabySex, HouseholdRole } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 
 export type HouseholdMemberSummary = {
@@ -32,5 +32,23 @@ export async function getPendingInvite(
     where: { householdId, usedAt: null, expiresAt: { gt: now } },
     orderBy: { createdAt: "desc" },
     select: { expiresAt: true },
+  });
+}
+
+export type BabyProfile = {
+  id: string;
+  name: string;
+  birthDate: Date;
+  sex: BabySex | null;
+};
+
+/** The baby's editable data, only within the caller's household. */
+export async function getBabyProfile(
+  babyId: string,
+  householdId: string,
+): Promise<BabyProfile | null> {
+  return db.baby.findFirst({
+    where: { id: babyId, householdId },
+    select: { id: true, name: true, birthDate: true, sex: true },
   });
 }

@@ -10,6 +10,7 @@ import {
   createHouseholdSchema,
   joinHouseholdSchema,
   removeHouseholdMemberSchema,
+  updateBabySchema,
 } from "@/features/household/schemas";
 import {
   generateInviteCode,
@@ -22,6 +23,7 @@ import {
   actionError,
   type ActionResult,
   handleActionError,
+  NotFoundError,
   ok,
   readPrismaCode,
   validationError,
@@ -33,6 +35,18 @@ import { env } from "@/lib/env";
 const INVALID_CODE_MESSAGE =
   "Ese código no vale o ha caducado. Pide uno nuevo.";
 const FULL_HOUSEHOLD_MESSAGE = "Esta familia ya está completa.";
+
+/**
+ * The baby's birth date as the household-local midnight (§2.5), or a field
+ * error. Unreachable while the schema validates YYYY-MM-DD; kept so an
+ * invalid date can never be stored.
+ */
+function toBirthDate(value: string): Date | ActionResult<never> {
+  const birthDate = parseDateOnly(value, env.APP_TIMEZONE);
+  if (birthDate) return birthDate;
+  const message = "Indica la fecha de nacimiento.";
+  return actionError("VALIDATION", message, { babyBirthDate: [message] });
+}
 
 /** Thrown inside the join transaction so the claimed invite rolls back too. */
 class HouseholdFullError extends Error {}
@@ -58,13 +72,8 @@ export async function createHousehold(input: unknown): Promise<ActionResult> {
 
   const { householdId, babyId, displayName, babyName, babyBirthDate, babySex } =
     parsed.data;
-  const birthDate = parseDateOnly(babyBirthDate, env.APP_TIMEZONE);
-  if (!birthDate) {
-    // Unreachable while the schema validates YYYY-MM-DD; kept so an invalid
-    // date can never be stored.
-    const message = "Indica la fecha de nacimiento.";
-    return actionError("VALIDATION", message, { babyBirthDate: [message] });
-  }
+  const birthDate = toBirthDate(babyBirthDate);
+  if (!(birthDate instanceof Date)) return birthDate;
 
   try {
     if (!(await getMemberByUserId(userId))) {
@@ -282,5 +291,34 @@ export async function revokeHouseholdInvite(): Promise<ActionResult> {
     return ok();
   } catch (error) {
     return handleActionError("revokeHouseholdInvite", error);
+  }
+}
+
+/**
+ * Settings: either member edits the baby's name, birth date and sex. Last
+ * write wins (§2.6). Scoped to the caller's household in the same
+ * statement, so another household's baby is indistinguishable from a
+ * missing one. "Prefiero no decirlo" (no sex) clears the stored one.
+ */
+export async function updateBaby(input: unknown): Promise<ActionResult> {
+  const member = await requireMember();
+  const parsed = updateBabySchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+  const { babyId, babyName, babyBirthDate, babySex } = parsed.data;
+  const birthDate = toBirthDate(babyBirthDate);
+  if (!(birthDate instanceof Date)) return birthDate;
+
+  try {
+    const { count } = await db.baby.updateMany({
+      where: { id: babyId, householdId: member.householdId },
+      data: { name: babyName, birthDate, sex: babySex ?? null },
+    });
+    if (count === 0) throw new NotFoundError();
+    // "Hoy" greets the baby by name; settings shows name and age.
+    revalidatePath("/");
+    revalidatePath("/settings");
+    return ok();
+  } catch (error) {
+    return handleActionError("updateBaby", error);
   }
 }

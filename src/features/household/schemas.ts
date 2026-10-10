@@ -27,20 +27,34 @@ const birthDate = z.iso
     { error: "Revisa la fecha: parece demasiado antigua." },
   );
 
-export const createHouseholdSchema = z.object({
-  householdId: z.uuid(),
-  babyId: z.uuid(),
-  displayName,
+/** The baby's data, the same rules when created and when edited. */
+const babyFields = {
   babyName: z
     .string()
     .trim()
     .min(1, { error: "Escribe el nombre del bebé." })
     .max(40, { error: "Usa 40 caracteres como máximo." }),
   babyBirthDate: birthDate,
+  // Optional: "Prefiero no decirlo" is undefined, stored as null (069).
   babySex: z.enum(BABY_SEXES).optional(),
+};
+
+export const createHouseholdSchema = z.object({
+  householdId: z.uuid(),
+  babyId: z.uuid(),
+  displayName,
+  ...babyFields,
 });
 
 export type CreateHouseholdInput = z.infer<typeof createHouseholdSchema>;
+
+/** Settings: either member edits the baby; the last save wins (§2.6). */
+export const updateBabySchema = z.object({
+  babyId: z.uuid(),
+  ...babyFields,
+});
+
+export type UpdateBabyInput = z.infer<typeof updateBabySchema>;
 
 export const joinHouseholdSchema = z.object({
   displayName,

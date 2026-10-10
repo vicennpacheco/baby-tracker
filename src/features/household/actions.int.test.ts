@@ -8,6 +8,7 @@ import {
   joinHousehold,
   removeHouseholdMember,
   revokeHouseholdInvite,
+  updateBaby,
 } from "@/features/household/actions";
 import { db } from "@/lib/db";
 import { parseDateOnly } from "@/lib/dates";
@@ -471,5 +472,81 @@ describe("revokeHouseholdInvite", () => {
     // Either the code was spent first (two members) or revoked (one).
     expect(members).toBe(joined === "REDIRECT:/" ? 2 : 1);
     await expect(pendingInvites(family.householdId)).resolves.toBe(0);
+  });
+});
+
+describe("updateBaby", () => {
+  function edit(babyId: string): Record<string, unknown> {
+    return {
+      babyId,
+      babyName: "  Martina ",
+      babyBirthDate: BIRTH_DATE,
+      babySex: "FEMALE",
+    };
+  }
+
+  function storedBaby(babyId: string): Promise<{
+    name: string;
+    birthDate: Date;
+    sex: string | null;
+  }> {
+    return db.baby.findUniqueOrThrow({
+      where: { id: babyId },
+      select: { name: true, birthDate: true, sex: true },
+    });
+  }
+
+  it("saves the name, birth date and sex, for either member", async () => {
+    const family = await familyWithPartner();
+    session.userId = family.partner;
+
+    await expect(updateBaby(edit(family.babyId))).resolves.toEqual({
+      ok: true,
+      data: undefined,
+    });
+
+    await expect(storedBaby(family.babyId)).resolves.toEqual({
+      name: "Martina",
+      birthDate: parseDateOnly(BIRTH_DATE, "Europe/Madrid"),
+      sex: "FEMALE",
+    });
+  });
+
+  it("clears the sex when the parent prefers not to say", async () => {
+    const family = await familyWithPartner();
+    await updateBaby(edit(family.babyId));
+
+    await updateBaby({ ...edit(family.babyId), babySex: undefined });
+
+    await expect(storedBaby(family.babyId)).resolves.toMatchObject({
+      sex: null,
+    });
+  });
+
+  it("answers another household's baby as not found, untouched", async () => {
+    await familyWithPartner();
+    const other = await createFamily();
+    const before = await storedBaby(other.babyId);
+
+    const result = await updateBaby(edit(other.babyId));
+
+    expect(result).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    await expect(storedBaby(other.babyId)).resolves.toEqual(before);
+  });
+
+  it("validates the input and saves nothing", async () => {
+    const family = await familyWithPartner();
+    const before = await storedBaby(family.babyId);
+
+    const result = await updateBaby({ ...edit(family.babyId), babyName: " " });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: {
+        code: "VALIDATION",
+        fieldErrors: { babyName: expect.any(Array) },
+      },
+    });
+    await expect(storedBaby(family.babyId)).resolves.toEqual(before);
   });
 });
