@@ -134,7 +134,7 @@ baby-tracker/
 │   ├── migrations/            # SQL de Prisma + RLS, índices parciales y publicación Realtime
 │   └── seed.ts                # Solo para el proyecto de desarrollo
 ├── prisma.config.ts           # Usa DIRECT_URL para la CLI de Prisma
-├── public/                    # Iconos PWA y service worker (Fase 4)
+├── public/                    # sw.js: service worker manual (los iconos los genera app/icon.tsx)
 ├── src/
 │   ├── proxy.ts               # Refresco de la sesión de Supabase (antes middleware.ts)
 │   ├── app/                   # Solo routing y composición de pantallas
@@ -142,7 +142,8 @@ baby-tracker/
 │   │   ├── (app)/             # Pantallas autenticadas (RealtimeSync en la Fase 4)
 │   │   │   ├── (tabs)/        # Con BottomNav: page.tsx ("Hoy"), feeding/ · diapers/ · sleep/ (historiales), more/ ("Más"), growth/ · health/ · settings/
 │   │   │   └── (task)/        # Sin barra, una tarea por pantalla: feeding/new/ · feeding/[id]/edit/ · settings/invite/…
-│   │   └── manifest.ts        # Fase 4
+│   │   ├── offline/           # Página «Sin conexión» del service worker (estática)
+│   │   └── manifest.ts        # Manifiesto de la PWA (icon.tsx y apple-icon.tsx generan los iconos)
 │   ├── features/              # Un directorio por módulo de dominio
 │   │   ├── feeding/
 │   │   │   ├── schemas.ts     # Zod (compartido cliente/servidor)
@@ -246,7 +247,7 @@ baby-tracker/
 
 **Objetivo:** una pantalla de inicio útil de un vistazo y una app instalable que funcione con **varios clientes simultáneos**.
 
-**Estado:** dashboard, sincronización y despliegue terminados el 2026-10-10. Queda la **PWA** (manifiesto, *service worker*, metadatos de iOS e instalabilidad).
+**Estado:** dashboard, sincronización y despliegue terminados el 2026-10-10; PWA (manifiesto, *service worker* y metadatos de iOS) el 2026-10-12. Queda verificar la instalación en los dos móviles y Lighthouse.
 
 > **Requisito de arquitectura de la PWA:** la app está diseñada para que varios clientes trabajen a la vez (ambos padres, cada uno con uno o más dispositivos) contra **una única fuente de verdad en la nube** (Supabase PostgreSQL).
 > - Ningún dispositivo guarda una copia propia de los datos que pueda divergir.
@@ -275,14 +276,14 @@ baby-tracker/
 
 **PWA**
 
-- [ ] `app/manifest.ts` (nombre, iconos 192/512 y *maskable*, `display: standalone`, `theme_color`).
-- [ ] Service worker con caché del *shell* estático y pantalla "Sin conexión" (elegir entre Serwist o un SW manual según la compatibilidad con la versión de Next.js/Turbopack). Las respuestas autenticadas (HTML/RSC con datos) no se cachean.
-- [ ] Metadatos para iOS (`apple-touch-icon`, `appleWebApp`) y `viewport` con `themeColor` claro/oscuro.
-- [ ] Verificar instalabilidad (Chrome DevTools → Application) y Lighthouse de rendimiento y accesibilidad ≥ 90.
+- [x] `app/manifest.ts` (nombre, iconos 192/512 y *maskable*, `display: standalone`, `theme_color`). *(Iconos provisionales generados con `next/og`; decisión 072.)*
+- [x] Service worker con caché del *shell* estático y pantalla "Sin conexión" (elegir entre Serwist o un SW manual según la compatibilidad con la versión de Next.js/Turbopack). Las respuestas autenticadas (HTML/RSC con datos) no se cachean. *(SW manual en `public/sw.js`, sin dependencias: solo guarda `/offline`, sus recursos y los iconos; decisión 072.)*
+- [x] Metadatos para iOS (`apple-touch-icon`, `appleWebApp`) y `viewport` con `themeColor` claro/oscuro. *(Más la tarjeta «Añádela a tu pantalla de inicio» en «Hoy» para iPhone y iPad; decisión 072.)*
+- [ ] Verificar instalabilidad (Chrome DevTools → Application) y Lighthouse de rendimiento y accesibilidad ≥ 90. *(Manifiesto, iconos, SW y página offline verificados en un build de producción local el 2026-10-12; falta instalarla en los dos móviles y pasar Lighthouse en producción.)*
 
 **Despliegue**
 
-- [ ] Vercel (u otra plataforma) con las funciones en una región de la UE próxima a Supabase. *(Desplegado en Vercel el 2026-10-10; falta confirmar que las funciones están en `cdg1`, París.)*
+- [x] Vercel (u otra plataforma) con las funciones en una región de la UE próxima a Supabase. *(Desplegado en Vercel el 2026-10-10, con las funciones en `cdg1`, París.)*
 - [x] *(Decisión 068: el proyecto existente, ya configurado así, es el de producción.)* Proyecto de Supabase **prod** en la UE, igual que dev: `prisma/platform/supabase-bootstrap.sql`, Data API desactivada, SMTP propio con `{{ .Token }}` en **las dos** plantillas, *Magic Link* y *Confirm signup* (un email nuevo recibe *Confirm signup*, porque `signInWithOtp` lo da de alta), y longitud del código OTP en 8.
 - [x] Variables de entorno de producción (incluida `DATABASE_CA_CERT`) y `prisma migrate deploy` contra el proyecto **prod**, verificado vía MCP. *(Variables introducidas por el usuario; 3 migraciones, los *triggers* y las particiones de mensajes verificados vía MCP el 2026-10-10.)*
 
