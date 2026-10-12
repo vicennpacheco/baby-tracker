@@ -6,8 +6,10 @@ import { redirect } from "next/navigation";
 import { getMemberByUserId } from "@/features/auth/queries";
 import { requireMember, requireUserId } from "@/features/auth/session";
 import { formatInviteCode } from "@/features/household/invite-code";
+import { matchesBabyName } from "@/features/household/delete-confirmation";
 import {
   createHouseholdSchema,
+  deleteHouseholdSchema,
   joinHouseholdSchema,
   removeHouseholdMemberSchema,
   updateBabySchema,
@@ -321,4 +323,87 @@ export async function updateBaby(input: unknown): Promise<ActionResult> {
   } catch (error) {
     return handleActionError("updateBaby", error);
   }
+}
+
+/**
+ * Settings: the invited parent leaves. Under the household lock their
+ * membership goes; what they logged stays, without a name (decision 064).
+ * The OWNER cannot leave in the MVP (no ownership transfer): their way out
+ * is deleting the family. On success it redirects to /join.
+ */
+export async function leaveHousehold(): Promise<ActionResult> {
+  const member = await requireMember();
+  if (member.role !== "MEMBER") {
+    return actionError(
+      "CONFLICT",
+      "Quien creó la familia no puede salir: puede eliminarla desde Ajustes.",
+    );
+  }
+
+  try {
+    await db.$transaction(async (tx) => {
+      await lockHousehold(tx, member.householdId);
+      await tx.householdMember.deleteMany({
+        where: {
+          householdId: member.householdId,
+          userId: member.userId,
+          role: "MEMBER",
+        },
+      });
+    });
+  } catch (error) {
+    return handleActionError("leaveHousehold", error);
+  }
+
+  revalidatePath("/settings");
+  redirect("/join");
+}
+
+/**
+ * Settings: the OWNER deletes the family, typing the baby's name to confirm
+ * (checked here too, not only by the dialog). Under the household lock that
+ * serializes redemptions (ADR-043), the household row goes and the database
+ * cascades to its members, invites, babies and every record: a physical
+ * delete (§2.6), the right to erasure. A code redeemed meanwhile either
+ * joined first and is erased with it, or finds the invite gone. On success
+ * it redirects to /join.
+ */
+export async function deleteHousehold(input: unknown): Promise<ActionResult> {
+  const member = await requireMember();
+  const parsed = deleteHouseholdSchema.safeParse(input);
+  if (!parsed.success) return validationError(parsed.error);
+  if (member.role !== "OWNER") {
+    return actionError(
+      "CONFLICT",
+      "Solo quien creó la familia puede eliminarla.",
+    );
+  }
+
+  try {
+    const isDeleted = await db.$transaction(async (tx) => {
+      await lockHousehold(tx, member.householdId);
+      // The MVP's baby, the one Settings names (getPrimaryBaby).
+      const baby = await tx.baby.findFirst({
+        where: { householdId: member.householdId },
+        orderBy: { createdAt: "asc" },
+        select: { name: true },
+      });
+      if (!baby || !matchesBabyName(parsed.data.babyName, baby.name)) {
+        return false;
+      }
+      await tx.household.delete({
+        where: { id: member.householdId },
+        select: { id: true },
+      });
+      return true;
+    });
+    if (!isDeleted) {
+      const message = "El nombre no coincide.";
+      return actionError("VALIDATION", message, { babyName: [message] });
+    }
+  } catch (error) {
+    return handleActionError("deleteHousehold", error);
+  }
+
+  redirect("/join");
 }

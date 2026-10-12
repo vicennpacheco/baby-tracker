@@ -77,3 +77,10 @@ export type JoinHouseholdInput = z.infer<typeof joinHouseholdSchema>;
 export const removeHouseholdMemberSchema = z.object({
   userId: z.uuid({ error: "Ese miembro no existe." }),
 });
+
+/** Settings: the OWNER types the baby's name to delete the family. */
+export const deleteHouseholdSchema = z.object({
+  babyName: z
+    .string({ error: "Escribe el nombre del bebé para confirmar." })
+    .max(80, { error: "Escribe el nombre del bebé para confirmar." }),
+});

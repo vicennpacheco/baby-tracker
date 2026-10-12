@@ -5,7 +5,9 @@ import { describe, expect, it, vi } from "vitest";
 import {
   createHousehold,
   createHouseholdInvite,
+  deleteHousehold,
   joinHousehold,
+  leaveHousehold,
   removeHouseholdMember,
   revokeHouseholdInvite,
   updateBaby,
@@ -14,10 +16,14 @@ import { db } from "@/lib/db";
 import { parseDateOnly } from "@/lib/dates";
 import { requireMember } from "@/test/session-double";
 import {
+  createDiaperChange,
   createFamily,
+  createFeeding,
+  createGrowthMeasurement,
   createHealthRecord,
   createInvite,
   createMember,
+  createSleepSession,
 } from "@/test/factories";
 import { session } from "@/test/session-double";
 
@@ -548,5 +554,159 @@ describe("updateBaby", () => {
       },
     });
     await expect(storedBaby(family.babyId)).resolves.toEqual(before);
+  });
+});
+
+describe("leaveHousehold", () => {
+  it("takes the MEMBER out; their records and the family stay", async () => {
+    const family = await familyWithPartner();
+    const record = await createFeeding(family.babyId, {
+      createdById: family.partner,
+    });
+    session.userId = family.partner;
+
+    await expect(leaveHousehold()).rejects.toThrow("REDIRECT:/join");
+
+    await expect(
+      db.householdMember.findMany({
+        where: { householdId: family.householdId },
+        select: { userId: true },
+      }),
+    ).resolves.toEqual([{ userId: family.owner }]);
+    await expect(db.feeding.count({ where: { id: record.id } })).resolves.toBe(
+      1,
+    );
+  });
+
+  it("refuses the OWNER, who can only delete the family", async () => {
+    const family = await familyWithPartner();
+
+    const result = await leaveHousehold();
+
+    expect(result).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    await expect(
+      db.householdMember.count({ where: { householdId: family.householdId } }),
+    ).resolves.toBe(2);
+  });
+});
+
+describe("deleteHousehold", () => {
+  /** One record of every kind and a pending code, all of them to go. */
+  async function fillHousehold(
+    family: Awaited<ReturnType<typeof familyWithPartner>>,
+  ): Promise<void> {
+    const author = { createdById: family.owner };
+    await createDiaperChange(family.babyId, author);
+    await createFeeding(family.babyId, author);
+    await createSleepSession(family.babyId, author);
+    await createGrowthMeasurement(family.babyId, author);
+    await createHealthRecord(family.babyId, author);
+    await createInvite(family.householdId, {
+      code: "ABCDEFGHJK",
+      createdById: family.owner,
+    });
+  }
+
+  async function leftovers(
+    householdId: string,
+    babyId: string,
+  ): Promise<number[]> {
+    return Promise.all([
+      db.household.count({ where: { id: householdId } }),
+      db.householdMember.count({ where: { householdId } }),
+      db.householdInvite.count({ where: { householdId } }),
+      db.baby.count({ where: { householdId } }),
+      db.diaperChange.count({ where: { babyId } }),
+      db.feeding.count({ where: { babyId } }),
+      db.sleepSession.count({ where: { babyId } }),
+      db.growthMeasurement.count({ where: { babyId } }),
+      db.healthRecord.count({ where: { babyId } }),
+    ]);
+  }
+
+  it("erases the family and everything in it once the name is typed", async () => {
+    const family = await familyWithPartner();
+    await fillHousehold(family);
+    const other = await createFamily();
+    await createFeeding(other.babyId, { createdById: other.userId });
+    session.userId = family.owner;
+
+    // Case and extra spaces do not matter.
+    await expect(deleteHousehold({ babyName: "  lucía " })).rejects.toThrow(
+      "REDIRECT:/join",
+    );
+
+    await expect(leftovers(family.householdId, family.babyId)).resolves.toEqual(
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    );
+    await expect(leftovers(other.householdId, other.babyId)).resolves.toEqual([
+      1, 1, 0, 1, 0, 1, 0, 0, 0,
+    ]);
+  });
+
+  it("deletes nothing when the typed name does not match", async () => {
+    const family = await familyWithPartner();
+    await fillHousehold(family);
+
+    const result = await deleteHousehold({ babyName: "Lucia" });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: {
+        code: "VALIDATION",
+        fieldErrors: { babyName: expect.any(Array) },
+      },
+    });
+    await expect(leftovers(family.householdId, family.babyId)).resolves.toEqual(
+      [1, 2, 1, 1, 1, 1, 1, 1, 1],
+    );
+  });
+
+  it("refuses a MEMBER, even with the right name", async () => {
+    const family = await familyWithPartner();
+    session.userId = family.partner;
+
+    const result = await deleteHousehold({ babyName: "Lucía" });
+
+    expect(result).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    await expect(
+      db.household.count({ where: { id: family.householdId } }),
+    ).resolves.toBe(1);
+  });
+
+  it("validates the input", async () => {
+    await familyWithPartner();
+    await expect(deleteHousehold({})).resolves.toMatchObject({
+      ok: false,
+      error: { code: "VALIDATION" },
+    });
+  });
+
+  it("leaves no member behind when a code is redeemed meanwhile", async () => {
+    const { family, code } = await familyWithInvite();
+    const joiner = randomUUID();
+
+    await Promise.all([
+      outcomeOf(
+        (async () => {
+          session.userId = family.userId;
+          return deleteHousehold({ babyName: "Lucía" });
+        })(),
+      ),
+      outcomeOf(
+        (async () => {
+          session.userId = joiner;
+          return joinHousehold({ displayName: "Pablo", code });
+        })(),
+      ),
+    ]);
+
+    // Joined first and then erased with the family, or found the code gone.
+    await expect(
+      db.household.count({ where: { id: family.householdId } }),
+    ).resolves.toBe(0);
+    await expect(
+      db.householdMember.count({ where: { userId: joiner } }),
+    ).resolves.toBe(0);
   });
 });
