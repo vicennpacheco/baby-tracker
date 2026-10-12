@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireBaby, requireMember } from "@/features/auth/session";
 import { BabyCard } from "@/features/household/components/baby-card";
+import { DangerZone } from "@/features/household/components/danger-zone";
 import { MemberList } from "@/features/household/components/member-list";
 import { RevokeInviteButton } from "@/features/household/components/revoke-invite-button";
 import {
@@ -46,6 +47,9 @@ export default function SettingsPage(): ReactNode {
           </h2>
           <ThemeChoice />
         </section>
+        <Suspense fallback={<SectionSkeleton rows={1} />}>
+          <DangerSection />
+        </Suspense>
       </div>
     </>
   );
@@ -61,6 +65,20 @@ async function BabySection(): Promise<ReactNode> {
       name={baby.name}
       age={formatBabyAge(baby.birthDate, now, timeZone)}
       birthDate={formatShortDate(baby.birthDate, now, timeZone)}
+    />
+  );
+}
+
+async function DangerSection(): Promise<ReactNode> {
+  const { member, baby } = await requireBaby();
+  const members = await listHouseholdMembers(member.householdId);
+  const partner = members.find(({ userId }) => userId !== member.userId);
+
+  return (
+    <DangerZone
+      role={member.role}
+      babyName={baby.name}
+      partnerName={partner?.displayName ?? null}
     />
   );
 }
