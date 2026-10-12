@@ -23,6 +23,16 @@ export const metadata: Metadata = {
   title: "Métricas Bebé",
   description:
     "Registro rápido de tomas, pañales, sueño, crecimiento y salud del bebé.",
+  // Installed from Safari's "Añadir a pantalla de inicio", iOS opens it
+  // full screen with this name (decision 072). The default status bar keeps
+  // its text readable in both themes; the safe areas are already handled.
+  appleWebApp: {
+    capable: true,
+    title: "Métricas Bebé",
+    statusBarStyle: "default",
+  },
+  // Dates and amounts are not phone numbers.
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
