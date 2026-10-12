@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Figtree, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { ServiceWorkerRegistration } from "@/components/layout/service-worker-registration";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: LayoutProps<"/">): ReactNode {
               screens, where the bar still spans the full width. */}
           <Toaster offset={TOAST_OFFSET} mobileOffset={TOAST_OFFSET} />
         </ThemeProvider>
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );
