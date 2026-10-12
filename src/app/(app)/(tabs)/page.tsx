@@ -3,6 +3,7 @@ import { Suspense, type ReactNode } from "react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { DayNav } from "@/components/shared/day-nav";
+import { InstallHint } from "@/components/shared/install-hint";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireBaby } from "@/features/auth/session";
 import { DaySummary } from "@/features/dashboard/components/day-summary";
@@ -96,6 +97,7 @@ async function TodaySection({
       {/* First use: a welcome instead of a summary of zeros. */}
       {!hasRecords && <FirstUseCard babyName={baby.name} />}
       {today && members.length < MAX_HOUSEHOLD_MEMBERS && <InvitePartnerCard />}
+      {today && <InstallHint />}
       <RunningTimers
         serverNow={serverNow}
         feeding={
