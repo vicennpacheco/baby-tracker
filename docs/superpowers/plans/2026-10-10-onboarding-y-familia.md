@@ -28,11 +28,12 @@
 - [x] 6. `updateBaby` (los dos miembros, Zod, `assertBabyInHousehold`), con tests de integración y prueba de mutación.
 - [x] 7. Pantalla `/settings/baby` y tarjeta «Tu bebé» en Ajustes.
 
-- [ ] QA del usuario: editar nombre, fecha y sexo (también «Prefiero no decirlo»), desde los dos móviles; la tarjeta «Tu bebé» con la edad.
+- [x] QA del usuario: editar nombre, fecha y sexo (también «Prefiero no decirlo»), desde los dos móviles; la tarjeta «Tu bebé» con la edad.
 
 ## Ronda 4 · Salir y eliminar la familia
 
-- [ ] 8. `leaveHousehold` (solo el MEMBER, bajo el bloqueo de la familia; el OWNER recibe `CONFLICT`).
-- [ ] 9. `deleteHousehold` (solo el OWNER; el servidor comprueba el nombre del bebé tecleado; borrado en cascada en una transacción con bloqueo).
-- [ ] 10. «Zona peligrosa» en Ajustes: «Salir de la familia» y «Eliminar familia» con `AlertDialog` y el nombre del bebé para desbloquear (excepción acotada a la regla 4.3).
-- [ ] Revisión de seguridad, accesibilidad y código; decisión 071 completada; QA del usuario con una familia de prueba (el borrado es real en producción).
+- [x] 8. `leaveHousehold` (solo el MEMBER, bajo el bloqueo de la familia; el OWNER recibe `CONFLICT`).
+- [x] 9. `deleteHousehold` (solo el OWNER; el servidor comprueba el nombre del bebé tecleado; borrado en cascada en una transacción con bloqueo).
+- [x] 10. «Zona peligrosa» en Ajustes: «Salir de la familia» y «Eliminar familia» con `AlertDialog` y el nombre del bebé para desbloquear (excepción acotada a la regla 4.3).
+- [x] Revisión de seguridad, accesibilidad y código; decisión 071 completada.
+- [ ] QA del usuario con una familia de prueba (el borrado es real en producción).
