@@ -36,4 +36,4 @@
 - [x] 9. `deleteHousehold` (solo el OWNER; el servidor comprueba el nombre del bebé tecleado; borrado en cascada en una transacción con bloqueo).
 - [x] 10. «Zona peligrosa» en Ajustes: «Salir de la familia» y «Eliminar familia» con `AlertDialog` y el nombre del bebé para desbloquear (excepción acotada a la regla 4.3).
 - [x] Revisión de seguridad, accesibilidad y código; decisión 071 completada.
-- [ ] QA del usuario con una familia de prueba (el borrado es real en producción).
+- [x] QA del usuario con una familia de prueba (el borrado es real en producción). **Bloque terminado el 2026-10-12.**
