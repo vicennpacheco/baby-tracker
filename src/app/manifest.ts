@@ -5,6 +5,8 @@ import type { MetadataRoute } from "next";
 // light --background, like the viewport's themeColor in the root layout.
 export default function manifest(): MetadataRoute.Manifest {
   return {
+    // Fixed identity: a later change of start_url is not a new app.
+    id: "/",
     name: "Métricas Bebé",
     short_name: "Métricas Bebé",
     description:

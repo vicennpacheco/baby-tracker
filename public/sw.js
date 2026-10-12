@@ -2,21 +2,20 @@
 //
 // It NEVER caches a response with the family's data: page loads (HTML),
 // React Server Component payloads and Server Actions always go to the
-// network. It only keeps what is the same for everyone:
-//   - the static /offline page, shown when a page load fails;
-//   - the app icons;
-//   - the build's content-hashed files under /_next/static/ (immutable).
+// network. When a page load fails, it shows the static /offline page,
+// stored at install time with the icons and the page's own CSS, fonts and
+// scripts. Nothing else is stored: the build files are already immutable
+// in the HTTP cache, and offline the app has nothing to show but that page.
 //
-// Bump VERSION when the precached files change; old caches are deleted.
+// Bump VERSION to store a newer /offline page; old caches are deleted.
 
 const VERSION = "v1";
-const CACHE = `static-${VERSION}`;
+const CACHE = `offline-${VERSION}`;
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/icon/192", "/icon/512", "/apple-icon"];
 
-// Also the offline page's own CSS, fonts and scripts, read from its HTML:
-// the visits so far may never have loaded them. Best effort: a missing
-// asset leaves the page less polished, never without its message.
+// The offline page's assets are read from its HTML. Best effort: a missing
+// one leaves the page less polished, never without its message.
 async function precache() {
   const cache = await caches.open(CACHE);
   await cache.addAll(PRECACHE);
@@ -49,8 +48,6 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // A page load carries the family's data: always the network, and the
-  // static offline page only when there is none.
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request).catch(() =>
@@ -62,25 +59,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Content-hashed build files never change under the same URL.
+  // The offline page's stored assets; content-hashed, so never stale.
   if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ??
-          fetch(request).then((response) => {
-            if (response.ok) {
-              const copy = response.clone();
-              event.waitUntil(
-                caches.open(CACHE).then((cache) => cache.put(request, copy)),
-              );
-            }
-            return response;
-          }),
-      ),
+      caches.match(request).then((cached) => cached ?? fetch(request)),
     );
   }
 
-  // Anything else (RSC payloads, icons on first use, the manifest) goes to
-  // the network untouched.
+  // Anything else goes to the network untouched.
 });
