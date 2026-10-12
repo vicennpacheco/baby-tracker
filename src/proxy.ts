@@ -66,7 +66,10 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
 export const config = {
   matcher: [
-    // Everything except static assets and image optimization.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // Everything except static assets, image optimization and the PWA's
+    // public files: the browser fetches the manifest, the service worker,
+    // the icons and the offline page without the session, and a redirect
+    // to /login would break installing the app (decision 072).
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icon|apple-icon|offline|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
