@@ -247,7 +247,7 @@ baby-tracker/
 
 **Objetivo:** una pantalla de inicio útil de un vistazo y una app instalable que funcione con **varios clientes simultáneos**.
 
-**Estado:** dashboard, sincronización y despliegue terminados el 2026-10-10; PWA (manifiesto, *service worker* y metadatos de iOS) el 2026-10-12. Queda verificar la instalación en los dos móviles y Lighthouse.
+**Estado:** terminada el 2026-10-12: el MVP está completo, desplegado e instalado en los dos móviles. Quedan para una próxima actualización los iconos definitivos y Lighthouse, que mide también el objetivo de 1,5 s en 4G.
 
 > **Requisito de arquitectura de la PWA:** la app está diseñada para que varios clientes trabajen a la vez (ambos padres, cada uno con uno o más dispositivos) contra **una única fuente de verdad en la nube** (Supabase PostgreSQL).
 > - Ningún dispositivo guarda una copia propia de los datos que pueda divergir.
@@ -279,7 +279,9 @@ baby-tracker/
 - [x] `app/manifest.ts` (nombre, iconos 192/512 y *maskable*, `display: standalone`, `theme_color`). *(Iconos provisionales generados con `next/og`; decisión 072.)*
 - [x] Service worker con caché del *shell* estático y pantalla "Sin conexión" (elegir entre Serwist o un SW manual según la compatibilidad con la versión de Next.js/Turbopack). Las respuestas autenticadas (HTML/RSC con datos) no se cachean. *(SW manual en `public/sw.js`, sin dependencias: solo guarda `/offline`, sus recursos y los iconos; decisión 072.)*
 - [x] Metadatos para iOS (`apple-touch-icon`, `appleWebApp`) y `viewport` con `themeColor` claro/oscuro. *(Más la tarjeta «Añádela a tu pantalla de inicio» en «Hoy» para iPhone y iPad; decisión 072.)*
-- [ ] Verificar instalabilidad (Chrome DevTools → Application) y Lighthouse de rendimiento y accesibilidad ≥ 90. *(Manifiesto, iconos, SW y página offline verificados en un build de producción local el 2026-10-12; falta instalarla en los dos móviles y pasar Lighthouse en producción.)*
+- [x] Verificar instalabilidad (Chrome DevTools → Application). *(Instalada en iOS y Android el 2026-10-12: abre a pantalla completa, la tarjeta de iOS funciona y, en modo avión, muestra «Sin conexión» sin errores.)*
+- [ ] Lighthouse de rendimiento y accesibilidad ≥ 90 en producción. *(Próxima actualización.)*
+- [ ] Iconos definitivos en lugar de los provisionales de `next/og`. *(Próxima actualización.)*
 
 **Despliegue**
 

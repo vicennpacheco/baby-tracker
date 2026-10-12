@@ -127,7 +127,7 @@ Server Action ─▶ PostgreSQL (fuente de verdad)
 
 ## 6. Bloques C y D — esbozo (plan propio más adelante)
 
-**C. PWA:** *(hecho el 2026-10-12 con un SW manual, sin Serwist; decisión 072. Queda instalarla en los móviles y Lighthouse.)*
+**C. PWA:** *(hecho el 2026-10-12 con un SW manual, sin Serwist; decisión 072. Instalada en iOS y Android el mismo día; Lighthouse e iconos definitivos, en una próxima actualización.)*
 - `app/manifest.ts`, iconos 192/512 y *maskable*;
 - *service worker* solo con el *shell* estático y una pantalla «Sin conexión». Elegir Serwist o un SW manual tras comprobar la compatibilidad con Next 16.4 y Turbopack: sería una dependencia nueva y hay que justificarla (regla 0.7);
 - metadatos de iOS;
