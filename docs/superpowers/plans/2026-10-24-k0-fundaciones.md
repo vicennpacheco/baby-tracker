@@ -139,7 +139,8 @@
 - [ ] Usuario: organización `nidly` en la **región de datos UE** (hecho) y proyecto Next.js; `NEXT_PUBLIC_SENTRY_DSN` en `.env` y Vercel, y `SENTRY_PROJECT` + `SENTRY_AUTH_TOKEN` en Vercel y GitHub para los *source maps*.
 - [x] `@sentry/nextjs` **11.6.0** (exacta; `withSentryConfig` viene de `@sentry/nextjs/config` desde la v11): `src/instrumentation.ts` (servidor y *edge*, `onRequestError`), `src/instrumentation-client.ts`, `src/lib/sentry-config.ts`, `sendDefaultPii: false`, sin *tracing*, Replay ni *logs*; `tunnelRoute: "/monitoring"` excluido del *matcher*; `sentryUrl` UE y telemetría del plugin desactivada; *source maps* solo con token y borrados tras subirlos. DSN validado en `public-env.ts`: solo `*.ingest.de.sentry.io`. Errores de `handleActionError` saneados (`sanitizeError`) y de `error.tsx`/`global-error` vía `ErrorState`. Plugin de Sentry para agentes instalado en Cursor.
 - [x] Tests de `src/lib/sentry-privacy.ts` (13, con pruebas de mutación de la región y del cuerpo de la petición).
-- [ ] Error de prueba de punta a punta (cliente por el túnel y servidor) cuando exista el DSN.
+- [x] Error de prueba de punta a punta (2026-10-24, build de producción local): servidor → ingesta UE `200`; navegador → `POST /monitoring?…&r=de` `200` con id de evento, sin ninguna petición directa del navegador a dominios de Sentry.
+- [ ] Confirmar los dos eventos en el panel de `nidly` (usuario).
 
 ### Tarea 8: sacar los tests de producción (bloqueada: destructiva)
 
