@@ -1,0 +1,89 @@
+# Production releases, by hand only (decisions 076 and 088). Vercel no longer
+# deploys main by itself (vercel.json); this workflow does, and only after the
+# same commit's migrations are applied and verified in staging and then, with
+# a reviewer's approval, in production.
+#
+# Run it from Actions → Release → "Run workflow" on main.
+# Secrets (set by the user, per GitHub environment, never in the repo):
+#   staging, production: DIRECT_URL, DATABASE_CA_CERT
+#   production:          VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+# The production environment must require a reviewer.
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never two releases at once, and never cancel one halfway through.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  PRISMA_HIDE_UPDATE_MESSAGE: "1"
+  # Pinned: the CLI that deploys to production is part of the supply chain.
+  VERCEL_CLI: vercel@63.1.2
+
+jobs:
+  migrate-staging:
+    name: Migrate and verify staging
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    env:
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npm run db:verify
+
+  migrate-production:
+    name: Migrate and verify production
+    needs: migrate-staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      DATABASE_CA_CERT: ${{ secrets.DATABASE_CA_CERT }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npm run db:verify
+
+  deploy-production:
+    name: Deploy the app to production
+    needs: migrate-production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      # Built by Vercel itself with the production variables it already holds:
+      # they never reach the runner.
+      - name: Deploy
+        run: npx --yes "$VERCEL_CLI" deploy --prod --yes --token "$VERCEL_TOKEN"
