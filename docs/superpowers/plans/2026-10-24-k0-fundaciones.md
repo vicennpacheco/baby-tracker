@@ -126,9 +126,10 @@
 
 ### Tarea 6: proyecto de staging (bloqueada hasta confirmar el coste)
 
-- [ ] Crear el proyecto vía MCP (organización Free, **0 $/mes**), región eu-west-3.
-- [ ] Ejecutar `supabase-bootstrap.sql` y desactivar la Data API (usuario, en el panel).
-- [ ] Crear el rol `prisma` según la guía de Supabase (usuario: contraseña).
+- [x] Crear el proyecto vía MCP (organización Free, **0 $/mes**), región eu-west-3: `nidly-staging`, creado el 2026-10-24.
+- [x] `supabase-bootstrap.sql` secciones 1–4 vía MCP. La sección 5 (política de `realtime.messages`) va **después** de la primera migración, porque usa `public.is_household_member`.
+- [ ] Usuario: desactivar la Data API en el panel.
+- [x] Crear el rol `prisma` según la guía de Supabase, **sin contraseña** (no puede iniciar sesión hasta que el usuario se la asigne con `alter role prisma with password '…'` en el editor SQL).
 - [ ] Usuario: SMTP, plantillas con `{{ .Token }}`, OTP de 8 dígitos y las variables `.env` y *Preview* de Vercel.
 - [ ] `prisma migrate deploy` + `db:verify` + `test:db` contra staging; `npm test` completo contra staging.
 - [ ] Seed sintético multi-familia (tarea separada, con su propio commit).
@@ -153,6 +154,7 @@
 ### Estado (2026-10-24)
 
 - Hecho: tareas 1–5 (salvo lo que exige push o configuración del usuario), limpieza de ramas (etiquetas `archive/*`), etiqueta `v1.0.0-mvp` y `.gitignore` recuperado.
+- **Hotfix desplegado:** `fix/security-patches` subido a `main` (`cff4e4d..59e1449`) con autorización del usuario.
 - **Hotfix de seguridad** fuera de plan (rama `fix/security-patches`, también aplicado aquí): Next.js 16.4.0 → 16.4.3 (ejecución remota de código y DoS críticos), Prisma 7.10.1 y Zod 4.6.7; `npm audit` sin vulnerabilidades. Producción sigue en 16.4.0 hasta desplegarlo.
 - `db:verify` en producción (solo lectura): todo en verde salvo un **aviso**: aún no existe la partición de hoy de `realtime.messages`, que Realtime crea con la primera conexión del día.
 - Bloqueado, a la espera del usuario: crear staging (0 $/mes), push y PR, entornos y *secrets* de GitHub, protección de `main`, cuenta de Sentry UE, borrar `baby_tracker_test` de producción.
