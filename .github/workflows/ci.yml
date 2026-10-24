@@ -1,0 +1,90 @@
+# Every pull request and every push to main (decisions 075 and 076).
+# Integration tests run against a throwaway PostgreSQL 17 on the runner, never
+# against a Supabase project: no secrets are needed and no real data is near.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PRISMA_HIDE_UPDATE_MESSAGE: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+  # Not secrets: the runner's own database and placeholders for the public
+  # Supabase variables that src/lib/public-env.ts requires at import time.
+  # The app only accepts the transaction-pooler port, so 6543 is mapped to the
+  # same server as 5432.
+  DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:6543/postgres?pgbouncer=true
+  DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+  NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci
+
+jobs:
+  checks:
+    name: Format, lint, types, unit tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run build
+
+  integration:
+    name: Migrations and integration tests (PostgreSQL 17)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      # src/lib/db.ts always asks for TLS, as against Supabase; the image's
+      # snakeoil certificate is enough for a database that lives for one job.
+      - name: Start PostgreSQL 17 with TLS
+        run: |
+          docker run -d --name postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -p 5432:5432 -p 6543:5432 \
+            postgres:17 \
+            -c ssl=on \
+            -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem \
+            -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+          # The init server only listens on a socket; TCP answers once the
+          # final server is up.
+          for attempt in $(seq 1 60); do
+            if docker exec postgres pg_isready -h 127.0.0.1 -U postgres; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs postgres
+          exit 1
+
+      # Stubs of supabase-bootstrap.sql (roles included) + prisma migrate deploy.
+      - run: npm run test:db
+
+      - name: Schema matches the migrations (no drift)
+        env:
+          DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:5432/baby_tracker_test
+        run: npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
+
+      - run: npm run test:int
