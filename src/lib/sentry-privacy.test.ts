@@ -1,7 +1,13 @@
 import type { ErrorEvent } from "@sentry/nextjs";
 import { describe, expect, it } from "vitest";
 
-import { isEuSentryDsn, sanitizeError, scrubEvent } from "@/lib/sentry-privacy";
+import {
+  isEuSentryDsn,
+  sanitizeError,
+  scrubEvent,
+  withoutBrowserSessions,
+  withoutRequestSessions,
+} from "@/lib/sentry-privacy";
 
 const EU_DSN =
   "https://0123456789abcdef0123456789abcdef@o123456.ingest.de.sentry.io/4507654321";
@@ -103,5 +109,47 @@ describe("sanitizeError", () => {
     const safe = sanitizeError("raw string with data", undefined);
     expect(safe.message).toBe("string");
     expect(safe.stack).not.toContain("raw string");
+  });
+});
+
+describe("withoutBrowserSessions", () => {
+  it("drops release-health sessions and keeps the error integrations", () => {
+    const integrations = [
+      { name: "GlobalHandlers" },
+      { name: "BrowserSession" },
+      { name: "Dedupe" },
+    ];
+    expect(withoutBrowserSessions(integrations).map((i) => i.name)).toEqual([
+      "GlobalHandlers",
+      "Dedupe",
+    ]);
+  });
+});
+
+describe("withoutRequestSessions", () => {
+  it("replaces the HTTP integration with one that tracks no sessions", () => {
+    const calls: unknown[] = [];
+    const replacement = { name: "Http" };
+    const result = withoutRequestSessions(
+      [{ name: "OnUncaughtException" }, { name: "Http" }],
+      (options) => {
+        calls.push(options);
+        return replacement;
+      },
+    );
+    expect(calls).toEqual([
+      { disableIncomingRequestSpans: true, sessions: false },
+    ]);
+    expect(result).toEqual([{ name: "OnUncaughtException" }, replacement]);
+    expect(result[1]).toBe(replacement);
+  });
+
+  it("leaves runtimes without an HTTP integration untouched", () => {
+    const integrations = [{ name: "WinterCGFetch" }];
+    expect(
+      withoutRequestSessions(integrations, () => {
+        throw new Error("must not be called");
+      }),
+    ).toEqual(integrations);
   });
 });

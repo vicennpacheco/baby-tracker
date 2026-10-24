@@ -88,3 +88,35 @@ export function sanitizeError(error: unknown, code: string | undefined): Error {
   safe.stack = [`${name}: ${safe.message}`, ...frames].join("\n");
   return safe;
 }
+
+// Release-health sessions measure usage, not code errors: decision 086 sends
+// exceptions only. Integrations are matched by their stable `name`.
+type NamedIntegration = { name: string };
+
+/** Browser: without the integration that opens a session per page load. */
+export function withoutBrowserSessions<T extends NamedIntegration>(
+  integrations: T[],
+): T[] {
+  return integrations.filter(
+    (integration) => integration.name !== "BrowserSession",
+  );
+}
+
+/**
+ * Node: the Next.js SDK swaps in httpIntegration({ disableIncomingRequestSpans:
+ * true }), which still aggregates a session per incoming request. Same swap,
+ * sessions off. Runtimes without it (edge) are left as they are.
+ */
+export function withoutRequestSessions<T extends NamedIntegration>(
+  integrations: T[],
+  httpIntegration: (options: {
+    disableIncomingRequestSpans: boolean;
+    sessions: boolean;
+  }) => T,
+): T[] {
+  return integrations.map((integration) =>
+    integration.name === "Http"
+      ? httpIntegration({ disableIncomingRequestSpans: true, sessions: false })
+      : integration,
+  );
+}
