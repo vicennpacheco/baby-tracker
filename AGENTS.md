@@ -8,15 +8,15 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Kidoo — instrucciones para agentes de código
+# Nidly — instrucciones para agentes de código
 
-Kidoo (nombre en clave; en producción, el MVP «Métricas Bebé») es un SaaS B2C multi-tenant para registrar y compartir en tiempo real el día a día de un bebé. Maneja **datos de salud de menores**, así que la privacidad y el aislamiento entre familias no son negociables.
+Nidly (en producción, todavía con la interfaz del MVP «Métricas Bebé») es un SaaS B2C multi-tenant para registrar y compartir en tiempo real el día a día de un bebé. Maneja **datos de salud de menores**, así que la privacidad y el aislamiento entre familias no son negociables.
 
 **Fuente de verdad de las reglas:** [`CLAUDE.md`](./CLAUDE.md). Este archivo y `.cursor/rules/` solo resumen y apuntan a ella; si discrepan, manda `CLAUDE.md`.
 
 Antes de proponer o escribir código:
 
-1. Lee `CLAUDE.md` completo y la fase en curso de [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md). Las reglas marcadas **[Kx]** solo rigen cuando esa fase está aprobada.
+1. Lee `CLAUDE.md` completo y la fase en curso de [`PLAN_ESCALABILIDAD_NIDLY.md`](./PLAN_ESCALABILIDAD_NIDLY.md). Las reglas marcadas **[Kx]** solo rigen cuando esa fase está aprobada.
 2. Consulta las decisiones relacionadas en [`docs/architecture/decisions.md`](./docs/architecture/decisions.md). Nunca borres filas: se sustituyen.
 3. Planifica y pide confirmación antes de cambios de esquema, dependencias nuevas, entornos o reglas.
 

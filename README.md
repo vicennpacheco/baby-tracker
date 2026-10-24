@@ -1,10 +1,10 @@
-# Kidoo
+# Nidly
 
 🇬🇧 **English** · 🇪🇸 [Leer en español](./README.es.md)
 
 > **Mobile-first B2C SaaS** (installable PWA) that lets families log their baby's day in seconds (feedings, diapers, sleep, growth and health) and **share it in real time** with every caregiver, with data protected in the EU.
 >
-> **Status (2026-10-24):** the MVP, **"Métricas Bebé"**, has been in production since 2026-10-10 and is used by a real family on iOS and Android. **Kidoo** is its evolution into a multi-tenant SaaS and is **under way**: see [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md) (in Spanish). "Kidoo" was a codename and has been **dropped** because of trademark risk; the final name is being chosen (decision 087). The plan was approved on 2026-10-24 and phase **K0** is in progress.
+> **Status (2026-10-24):** the MVP, **"Métricas Bebé"**, has been in production since 2026-10-10 and is used by a real family on iOS and Android. **Nidly** is its evolution into a multi-tenant SaaS and is **under way**: see [`PLAN_ESCALABILIDAD_NIDLY.md`](./PLAN_ESCALABILIDAD_NIDLY.md) (in Spanish). "Kidoo" was a codename and has been **dropped** because of trademark risk; the final name is **Nidly** (decision 087). The plan was approved on 2026-10-24 and phase **K0** is in progress.
 
 ---
 
@@ -12,7 +12,7 @@
 
 In the first months with a baby there are questions the pediatrician always asks and that nobody remembers at 4 a.m.: when did the baby last eat? Which breast? How many wet diapers today? How long did the baby sleep? And when several people take care of the baby, the questions multiply: did you already give the bottle?
 
-Kidoo is a quick log designed to be used **one-handed, in low light and half asleep**, shared by the whole family: what one caregiver logs shows up instantly on everyone else's phone. On top of that reliable base, Kidoo adds what you need to understand the data, without interpreting it medically:
+Nidly is a quick log designed to be used **one-handed, in low light and half asleep**, shared by the whole family: what one caregiver logs shows up instantly on everyone else's phone. On top of that reliable base, Nidly adds what you need to understand the data, without interpreting it medically:
 - WHO growth percentiles;
 - a report for the pediatrician;
 - sleep window predictions;
@@ -29,7 +29,7 @@ Kidoo is a quick log designed to be used **one-handed, in low light and half asl
    - data and compute in the EU;
    - strict isolation between families in the database;
    - AI only with consent, and never trained on your data.
-7. **Never a diagnosis:** Kidoo logs, summarizes and compares with references. When in doubt, ask your pediatrician.
+7. **Never a diagnosis:** Nidly logs, summarizes and compares with references. When in doubt, ask your pediatrician.
 
 ### Features
 
@@ -53,7 +53,7 @@ Kidoo is a quick log designed to be used **one-handed, in low light and half asl
 | **Sleep prediction** | Explained suggested window for the next nap | 📐 K8 |
 | **Plans** | Freemium: logging and sync are free | 📐 K9 |
 
-> **Disclaimer:** Kidoo is a logging tool. It does not give medical advice or diagnoses. When in doubt, ask your pediatrician.
+> **Disclaimer:** Nidly is a logging tool. It does not give medical advice or diagnoses. When in doubt, ask your pediatrician.
 
 ---
 
@@ -122,7 +122,7 @@ Requirement: **Node.js 24 LTS**. Prisma is pinned to **stable 7.x**, because npm
   (router.refresh())
 ```
 
-**Kidoo (target):**
+**Nidly (target):**
 - RLS also applied to server queries (`withTenant` + `app_tenant` role);
 - `next-intl`;
 - chat over the same private channel;
@@ -130,7 +130,7 @@ Requirement: **Node.js 24 LTS**. Prisma is pinned to **stable 7.x**, because npm
 - reports in private Storage with signed links;
 - CI/CD with a staging environment.
 
-The full diagram is in [`PLAN_ESCALABILIDAD_KIDOO.md` §5](./PLAN_ESCALABILIDAD_KIDOO.md#5-arquitectura-objetivo).
+The full diagram is in [`PLAN_ESCALABILIDAD_NIDLY.md` §5](./PLAN_ESCALABILIDAD_NIDLY.md#5-arquitectura-objetivo).
 
 **Principles:**
 - **Reads:** Server Components with Prisma, through `features/<module>/queries.ts`. No internal REST API.
@@ -161,7 +161,7 @@ Prisma models in PascalCase mapped to snake_case tables and columns (`feedings.b
 | `SleepPrediction` | Batch prediction (V2) | K8 |
 | `Subscription` · `BillingEvent` | Plans | K9 |
 
-The planned migrations (SQL drafts) are in [`PLAN_ESCALABILIDAD_KIDOO.md` §11](./PLAN_ESCALABILIDAD_KIDOO.md#11-migraciones-sql-borradores).
+The planned migrations (SQL drafts) are in [`PLAN_ESCALABILIDAD_NIDLY.md` §11](./PLAN_ESCALABILIDAD_NIDLY.md#11-migraciones-sql-borradores).
 
 ---
 
@@ -194,7 +194,7 @@ baby-tracker/                    # renamed with the final brand (K9)
 ├── docs/
 │   ├── architecture/decisions.md      # Architecture decision log (ADR 001–085)
 │   └── superpowers/plans/             # Detailed plan for each phase
-├── PLAN_ESCALABILIDAD_KIDOO.md  # Kidoo technical vision and development order
+├── PLAN_ESCALABILIDAD_NIDLY.md  # Nidly technical vision and development order
 ├── CLAUDE.md                    # Rules for Claude (and for any contributor)
 ├── AGENTS.md                    # Entry point for coding agents
 └── .cursor/rules/               # Cursor rules (point to CLAUDE.md)
@@ -213,15 +213,15 @@ baby-tracker/                    # renamed with the final brand (K9)
 | 3 · UI/UX | All five modules, onboarding, settings, AA accessibility | ✅ 2026-10-09 |
 | 4 · Dashboard, sync, PWA and deploy | "Today", private Broadcast, PWA installed on iOS and Android, Vercel + Supabase in production | ✅ 2026-10-12 |
 
-Left over from the MVP, taken over by Kidoo:
+Left over from the MVP, taken over by Nidly:
 - [ ] Lighthouse performance and accessibility ≥ 90 in production (including the 1.5 s on 4G target). → K9
 - [ ] Final icons. → K1 / K9, together with the brand
 
 Each phase is detailed in the plans in [`docs/superpowers/plans/`](./docs/superpowers/plans/) and in decisions 001–072.
 
-### Kidoo — 🚧 in progress (K0)
+### Nidly — 🚧 in progress (K0)
 
-Strict order: each phase starts when the previous one meets its exit criteria. Details in [`PLAN_ESCALABILIDAD_KIDOO.md` §12](./PLAN_ESCALABILIDAD_KIDOO.md#12-orden-secuencial-estricto-de-desarrollo).
+Strict order: each phase starts when the previous one meets its exit criteria. Details in [`PLAN_ESCALABILIDAD_NIDLY.md` §12](./PLAN_ESCALABILIDAD_NIDLY.md#12-orden-secuencial-estricto-de-desarrollo).
 
 - [ ] **K0 · Foundations:**
   - `v1.0.0-mvp` tag and protected `main`;
@@ -292,7 +292,7 @@ cp .env.example .env          # Today: the Supabase project's values; from K0 on
 
 ## Contributing
 
-1. Read [`CLAUDE.md`](./CLAUDE.md) (architecture, conventions, design and security) and the current phase of [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md). Both are in Spanish, the project's working language.
+1. Read [`CLAUDE.md`](./CLAUDE.md) (architecture, conventions, design and security) and the current phase of [`PLAN_ESCALABILIDAD_NIDLY.md`](./PLAN_ESCALABILIDAD_NIDLY.md). Both are in Spanish, the project's working language.
 2. Work on a short-lived branch (`feat/…`, `fix/…`, `docs/…`, `db/…`), never on `main`, which deploys to production.
 3. Commits follow Conventional Commits, in English. One migration per PR, always *expand → migrate → contract*.
 4. If you change the README, update its Spanish version (`README.es.md`) in the same commit.

@@ -1,6 +1,6 @@
-# Plan de escalabilidad: de «Métricas Bebé» a Kidoo
+# Plan de escalabilidad: de «Métricas Bebé» a Nidly
 
-> **Estado:** **aprobado** el 2026-10-24 (decisiones 073–088). Fase en curso: **K0**. «Kidoo» queda descartado como nombre (087); se mantiene en este documento hasta elegir el definitivo.
+> **Estado:** **aprobado** el 2026-10-24 (decisiones 073–088). Fase en curso: **K0**. El nombre definitivo es **Nidly** (087), que sustituye al nombre en clave «Kidoo».
 > **Autoría:** revisión de arquitectura (Staff) y de producto sobre el MVP desplegado (`main` en `cff4e4d`, Fase 4 cerrada el 2026-10-12).
 > **Decisiones asociadas:** 073–085 en [`docs/architecture/decisions.md`](./docs/architecture/decisions.md), todas en estado «Propuesta».
 
@@ -8,9 +8,9 @@
 
 ## 0. Resumen ejecutivo
 
-El MVP ya tiene la base correcta de un SaaS: datos acotados por familia (`household_id`), RLS en todas las tablas, idempotencia por UUID, concurrencia resuelta en PostgreSQL y sincronización privada por familia. Kidoo no exige reescribirlo. Exige **cuatro cambios de fondo** y **construir encima** en un orden estricto:
+El MVP ya tiene la base correcta de un SaaS: datos acotados por familia (`household_id`), RLS en todas las tablas, idempotencia por UUID, concurrencia resuelta en PostgreSQL y sincronización privada por familia. Nidly no exige reescribirlo. Exige **cuatro cambios de fondo** y **construir encima** en un orden estricto:
 
-1. **Entornos y CI/CD antes que nada** (fase K0). Hoy la única base de datos es la de producción y los tests de integración corren en su misma instancia (decisión 068). Ningún cambio de esquema de Kidoo debería tocar producción sin pasar por staging y CI.
+1. **Entornos y CI/CD antes que nada** (fase K0). Hoy la única base de datos es la de producción y los tests de integración corren en su misma instancia (decisión 068). Ningún cambio de esquema de Nidly debería tocar producción sin pasar por staging y CI.
 2. **i18n antes de crecer la UI** (K1). Cada pantalla nueva escrita en español duro sería trabajo doble, y el multidioma es además la mejora más visible para el portfolio. Decidido el 2026-10-24: va justo después de K0, con español e inglés.
 3. **Multi-tenant de verdad** (K2): un usuario en varias familias, roles y, sobre todo, **RLS aplicada también a las consultas del servidor**. Hoy Prisma se salta RLS y toda la protección depende de no olvidar un filtro en el código. Sus pantallas nuevas (roles, selector de familia) ya nacen traducidas.
 4. **IA con privacidad por diseño** (K6–K7). Son datos de salud de menores: Gemini **a través de Vertex AI en la UE**, con consentimiento explícito, sin entrenamiento y con confirmación humana antes de escribir nada.
@@ -40,7 +40,7 @@ Orden recomendado: **K0** Fundaciones → **K1** i18n → **K2** Multi-tenant �
 
 | # | Hallazgo | Impacto | Se resuelve en |
 |---|---|---|---|
-| R1 | **Un solo proyecto Supabase, y es producción.** No hay dónde probar una migración. | Cualquier migración de Kidoo se probaría sobre datos reales de menores. | K0 (staging) |
+| R1 | **Un solo proyecto Supabase, y es producción.** No hay dónde probar una migración. | Cualquier migración de Nidly se probaría sobre datos reales de menores. | K0 (staging) |
 | R2 | **`baby_tracker_test` vive en la instancia de producción** (decisión 068), protegido por una guarda de nombre. | Un error en la guarda vaciaría producción (`TRUNCATE … CASCADE`). | K0 (tests en CI y staging) |
 | R3 | **Sin CI.** Typecheck, lint y tests solo corren en local; `main` despliega producción directamente en Vercel. | Un commit roto llega a producción. | K0 |
 | R4 | **Prisma se salta RLS** (rol `prisma` con `BYPASSRLS`). | La seguridad depende de que ningún desarrollador olvide un `where`. Aceptable con 2 usuarios; no con miles de familias. | K2 (decisión 078) |
@@ -57,10 +57,10 @@ Orden recomendado: **K0** Fundaciones → **K1** i18n → **K2** Multi-tenant �
 
 ## 2. Estrategia de Git (decisión 074)
 
-**Recomendación: trunk-based con PR obligatorias y *feature flags*.** Se descartan GitFlow (`develop` + `release/*`) y una rama `kidoo` de larga vida.
+**Recomendación: trunk-based con PR obligatorias y *feature flags*.** Se descartan GitFlow (`develop` + `release/*`) y una rama `nidly` de larga vida.
 
-- **Por qué no una rama `kidoo` larga:** el esquema de producción seguiría evolucionando en `main` y la rama acumularía migraciones con marcas de tiempo cruzadas. Prisma Migrate aplica las migraciones por orden y fusionarlas tarde produce *drift*.
-- **Por qué *flags*:** permiten fusionar en `main` cada paso pequeño de Kidoo (por ejemplo, la tabla del chat) sin enseñarlo a los usuarios. Se apagan en producción y se encienden en staging o para familias *beta*.
+- **Por qué no una rama `nidly` larga:** el esquema de producción seguiría evolucionando en `main` y la rama acumularía migraciones con marcas de tiempo cruzadas. Prisma Migrate aplica las migraciones por orden y fusionarlas tarde produce *drift*.
+- **Por qué *flags*:** permiten fusionar en `main` cada paso pequeño de Nidly (por ejemplo, la tabla del chat) sin enseñarlo a los usuarios. Se apagan en producción y se encienden en staging o para familias *beta*.
 
 ### 2.1 Reglas
 
@@ -68,7 +68,7 @@ Orden recomendado: **K0** Fundaciones → **K1** i18n → **K2** Multi-tenant �
 2. Ramas cortas (≤ 3 días) desde `main`: `feat/<ámbito>-<tema>`, `fix/…`, `docs/…`, `chore/…`, `db/…` (para migraciones que van solas, ver §4.3).
 3. Fusión con **«Rebase and merge»**: historial lineal y commits atómicos en Conventional Commits, como hasta ahora.
 4. **Una migración por PR** y nunca dos PR abiertas con migraciones a la vez. Si ocurre, la segunda se rebasa y se regenera la marca de tiempo antes de fusionar.
-5. Etiquetas semánticas: `v1.0.0-mvp` sobre `cff4e4d` (estado del MVP, punto de restauración) y después `v1.x` por fase de Kidoo cerrada.
+5. Etiquetas semánticas: `v1.0.0-mvp` sobre `cff4e4d` (estado del MVP, punto de restauración) y después `v1.x` por fase de Nidly cerrada.
 6. *Feature flags* en dos niveles:
    - por entorno, con variables validadas en `env.ts` (`FEATURE_CHAT`, `FEATURE_AI`…);
    - por familia, con `household_feature_overrides` para *beta testers* (K2).
@@ -86,9 +86,9 @@ Orden recomendado: **K0** Fundaciones → **K1** i18n → **K2** Multi-tenant �
 
 | Entorno | Supabase | Vercel | Datos | Quién migra |
 |---|---|---|---|---|
-| **local** | proyecto `staging` (no hay Docker en esta máquina; ver 3.3) | `npm run dev` | de prueba | nadie: solo `migrate dev` contra la BD `kidoo_dev` de staging |
+| **local** | proyecto `staging` (no hay Docker en esta máquina; ver 3.3) | `npm run dev` | de prueba | nadie: solo `migrate dev` contra la BD `nidly_dev` de staging |
 | **ci** | Postgres 17 efímero (contenedor de servicio de GitHub Actions) + `shadow-stubs.sql` | — | creados por cada test | CI, en cada ejecución |
-| **staging** | **proyecto nuevo** `kidoo-staging`, eu-west-3 | *Preview* de cada PR | seed sintético | CI, automático al fusionar en `main` |
+| **staging** | **proyecto nuevo** `nidly-staging`, eu-west-3 | *Preview* de cada PR | seed sintético | CI, automático al fusionar en `main` |
 | **production** | proyecto actual (decisión 068) | *Production* (`main`) | reales | CI, tras **aprobación manual** |
 
 ### 3.2 Por qué un proyecto de staging y no Supabase Branching
@@ -100,7 +100,7 @@ Un proyecto de staging es más simple, más barato de razonar y repite exactamen
 ### 3.3 Base de datos de tests
 
 - **CI:** cada ejecución levanta `postgres:17` como contenedor de servicio, carga `prisma/platform/shadow-stubs.sql` (los mismos *stubs* que la base de datos temporal de Prisma) y aplica las migraciones. Los tests de integración, incluidos los nuevos de aislamiento entre familias (§6.6), corren ahí, sin red hacia Supabase.
-- **Local:** `kidoo_test` dentro del proyecto **staging**, con la guarda de las decisiones 037 y 038. `baby_tracker_test` desaparece de la instancia de producción. Se borra con tu confirmación explícita (regla 0.2).
+- **Local:** `baby_tracker_test` dentro del proyecto **staging**, con la guarda de las decisiones 037 y 038. `baby_tracker_test` desaparece de la instancia de producción. Se borra con tu confirmación explícita (regla 0.2).
 - **Docker local:** opcional. Si lo instalas, `supabase start` daría un entorno 100 % local; el plan no depende de ello.
 
 ### 3.4 Datos de staging
@@ -109,7 +109,7 @@ El seed se reescribe como **datos sintéticos multi-familia**: 3 familias, 2 beb
 
 ### 3.5 Pasos manuales que tienes que hacer tú (los secretos nunca pasan por Claude)
 
-1. Crear el proyecto Supabase `kidoo-staging` en eu-west-3 (o autorizarme a crearlo vía MCP tras confirmar el coste).
+1. Crear el proyecto Supabase `nidly-staging` en eu-west-3 (o autorizarme a crearlo vía MCP tras confirmar el coste).
 2. Configurar en él el SMTP, las plantillas con `{{ .Token }}` y la longitud del OTP en 8, como en producción.
 3. Introducir en Vercel las variables del entorno *Preview* (staging) y en GitHub los *secrets* de los entornos `staging` y `production` (`DIRECT_URL_*`).
 
@@ -207,7 +207,7 @@ Alternativa más estricta, si la prefieres: desactivar el despliegue automático
 ### 6.2 Usuarios en varias familias
 
 - `household_members`: `UNIQUE (household_id, user_id)` en lugar de `UNIQUE (user_id)`, más índice `(user_id, household_id)`.
-- **Familia activa:** cookie `kidoo-household` con el id. El servidor la valida en cada petición dentro de `requireMember()`; si no es válida o falta, usa la primera familia. Nunca se confía en ella sin comprobar la pertenencia.
+- **Familia activa:** cookie `nidly-household` con el id. El servidor la valida en cada petición dentro de `requireMember()`; si no es válida o falta, usa la primera familia. Nunca se confía en ella sin comprobar la pertenencia.
 - Selector de familia en «Más» (y en «Hoy» si hay más de una). Cambiar de familia escribe la cookie con una Server Action y redirige a `/`.
 - `requireMember()` pasa a devolver `{ userId, householdId, role }`, y `RealtimeSync` se suscribe al canal de la familia activa.
 
@@ -312,7 +312,7 @@ En esta fase el nombre de la app pasa a ser un mensaje (`app.name`) y el manifie
 - **Notificaciones Web Push** (K3b, opcional):
   - iOS solo las admite en PWA instaladas;
   - requiere claves VAPID y la dependencia `web-push`, o una Edge Function;
-  - el aviso dice «Mensaje nuevo en Kidoo», **sin el contenido**, porque puede contener datos de salud.
+  - el aviso dice «Mensaje nuevo en Nidly», **sin el contenido**, porque puede contener datos de salud.
 - **Retención:** configurable por familia (por defecto, indefinida). Se exporta con los datos de la familia (§13).
 
 ### 8.2 Por qué no enviar el mensaje por el socket
@@ -415,7 +415,7 @@ Los datos del bebé son **estructurados**: buscarlos por similitud vectorial ser
 **Conclusiones:**
 1. Registro, sincronización, percentiles e informes son **lo mínimo que se espera** (*table stakes*).
 2. Se diferencia quien **predice** (sueño) y quien **reduce la fricción del registro** (IA y voz).
-3. **Hueco para Kidoo:** tiempo real de verdad entre cuidadores, registro por voz o texto con confirmación, privacidad europea (datos en la UE, IA sin entrenamiento) y multilingüe desde el diseño.
+3. **Hueco para Nidly:** tiempo real de verdad entre cuidadores, registro por voz o texto con confirmación, privacidad europea (datos en la UE, IA sin entrenamiento) y multilingüe desde el diseño.
 
 *Fuentes al final del documento. Precios y funciones de terceros según fichas y paywalls públicos, sujetos a cambio.*
 
@@ -486,7 +486,7 @@ Los datos del bebé son **estructurados**: buscarlos por similitud vectorial ser
 
 ### 11.1 K1 · `user_profiles`
 
-Primera migración de Kidoo: pequeña, solo añade (*expand*) y sirve para estrenar el circuito staging → producción de K0.
+Primera migración de Nidly: pequeña, solo añade (*expand*) y sirve para estrenar el circuito staging → producción de K0.
 
 ```sql
 -- Generado por Prisma a partir de schema.prisma ──────────────────────────────
@@ -941,7 +941,7 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 1. Aprobar este plan y las decisiones 073–084 (o ajustarlas). La 085 ya está aprobada.
 2. Etiqueta `v1.0.0-mvp` sobre `cff4e4d`; revisar y archivar las 3 ramas y *worktrees* obsoletos (R8).
 3. Proteger `main` en GitHub (PR obligatoria y CI obligatoria).
-4. Crear `kidoo-staging` (paso manual, §3.5): *bootstrap*, `migrate deploy`, seed sintético y `kidoo_test`.
+4. Crear `nidly-staging` (paso manual, §3.5): *bootstrap*, `migrate deploy`, seed sintético y `baby_tracker_test`.
 5. `ci.yml` (§4.1) con Postgres efímero; adaptar `scripts/test-db.ts` y la guarda a staging o CI.
 6. `scripts/verify-db.ts` y `db-deploy.yml` (§4.2) con los entornos protegidos de GitHub.
 7. Variables de *Preview* de Vercel → staging.
@@ -968,7 +968,7 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 - la app completa en `en` sin un solo texto en español, y en `xx` sin desbordes a 375 px;
 - tests y build en verde;
 - revisión de accesibilidad en ambos idiomas;
-- primera migración de Kidoo aplicada por el circuito staging → producción de K0.
+- primera migración de Nidly aplicada por el circuito staging → producción de K0.
 
 ### K2 · Multi-tenant (L)
 
@@ -1084,14 +1084,14 @@ Las versiones se fijan y se verifican contra la documentación oficial al instal
 
 ### 13.2 Regulación sanitaria y de IA
 
-- **Reglamento de productos sanitarios (MDR, regla 11):** el software que da información para decisiones diagnósticas o terapéuticas puede ser producto sanitario. Kidoo se mantiene en **registro, resumen y referencia estadística**: sin alertas clínicas, sin «riesgo» y con derivación al pediatra. Las predicciones (K8) y el asistente (K6) se revisan con este criterio antes de publicarlos.
+- **Reglamento de productos sanitarios (MDR, regla 11):** el software que da información para decisiones diagnósticas o terapéuticas puede ser producto sanitario. Nidly se mantiene en **registro, resumen y referencia estadística**: sin alertas clínicas, sin «riesgo» y con derivación al pediatra. Las predicciones (K8) y el asistente (K6) se revisan con este criterio antes de publicarlos.
 - **Reglamento de IA de la UE:** transparencia (avisar de que se interactúa con una IA y marcar el contenido generado). Sin usos de alto riesgo previstos.
 
 ### 13.3 Riesgos
 
 | Riesgo | Prob. | Impacto | Mitigación |
 |---|---|---|---|
-| Conflicto de marca «Kidoo» | Alta | Alto | Búsqueda de marca antes de K1; «Kidoo» como nombre en clave (073) |
+| Conflicto de marca «Nidly» | Media | Alto | «Kidoo» se descartó por este motivo (073). Para «Nidly», el cribado web no halló conflictos; búsqueda formal (EUIPO/TMview, OEPM, USPTO) y dominio antes del lanzamiento (K9, decisión 087) |
 | Fuga entre familias | Baja | Crítico | RLS aplicada al servidor (078) y suite de aislamiento con mutación (§6.6) |
 | Coste de IA descontrolado | Media | Medio | Cuotas en BD, modelo Flash y beta cerrada (§9.5) |
 | Alucinación que se registra | Media | Alto | Confirmación humana y validación Zod (081) |
@@ -1104,7 +1104,7 @@ Las versiones se fijan y se verifican contra la documentación oficial al instal
 
 ## 14. Costes orientativos (a validar con los precios vigentes)
 
-| Concepto | Hoy | Kidoo (lanzamiento) |
+| Concepto | Hoy | Nidly (lanzamiento) |
 |---|---|---|
 | Vercel | Hobby (no comercial) | **Pro**, obligatorio para uso comercial |
 | Supabase producción | Plan actual | **Pro** + cómputo según carga + PITR recomendado |
@@ -1117,7 +1117,7 @@ Las versiones se fijan y se verifican contra la documentación oficial al instal
 
 ## 15. Decisiones que necesito de ti antes de K0
 
-**Respuestas del usuario (2026-10-24):** D1 «Kidoo» descartado, propuestas de nombre en la decisión 087; D2 staging por MCP, con confirmación del coste antes de crearlo; D3 **promoción manual desde GitHub** tras verificar la migración (088); D4 **Sentry en la región UE**, sin que la telemetría salga de Europa (086); D5 roles aprobados.
+**Respuestas del usuario (2026-10-24):** D1 «Kidoo» descartado y elegido **Nidly** (087); D2 staging por MCP, con confirmación del coste antes de crearlo; D3 **promoción manual desde GitHub** tras verificar la migración (088); D4 **Sentry en la región UE**, sin que la telemetría salga de Europa (086); D5 roles aprobados.
 
 **Ya decidido antes (2026-10-24):** multidioma justo después de K0 (fase K1, antes del multi-tenant), con español e inglés en la primera versión, y README bilingüe para el portfolio (`README.md` en inglés y `README.es.md` en español, decisión 085).
 

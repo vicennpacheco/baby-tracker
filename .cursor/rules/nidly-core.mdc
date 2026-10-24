@@ -1,11 +1,11 @@
 ---
-description: Reglas base de Kidoo (SaaS multi-tenant de registro de bebés). Siempre activas; la fuente de verdad es CLAUDE.md.
+description: Reglas base de Nidly (SaaS multi-tenant de registro de bebés). Siempre activas; la fuente de verdad es CLAUDE.md.
 alwaysApply: true
 ---
 
-# Kidoo · reglas base
+# Nidly · reglas base
 
-**Fuente de verdad:** `CLAUDE.md` en la raíz del repositorio. Léelo antes de proponer cambios. Si esta regla discrepa de él, manda `CLAUDE.md`. Plan y fases: `PLAN_ESCALABILIDAD_KIDOO.md`. Decisiones: `docs/architecture/decisions.md`.
+**Fuente de verdad:** `CLAUDE.md` en la raíz del repositorio. Léelo antes de proponer cambios. Si esta regla discrepa de él, manda `CLAUDE.md`. Plan y fases: `PLAN_ESCALABILIDAD_NIDLY.md`. Decisiones: `docs/architecture/decisions.md`.
 
 - Conversación con el usuario en español. Código, BD, rutas, commits y comentarios en inglés. Textos de UI en español hoy y en catálogos `messages/<locale>/` desde la fase K1.
 - Datos de salud de menores: aislamiento por familia en cada query y action (`requireMember()`), RLS en todas las tablas y nada de datos reales fuera de producción.

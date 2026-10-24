@@ -11,7 +11,7 @@
 
 **Tech stack:** GitHub Actions, Docker `postgres:17` en el *runner*, `pg`, Prisma 7 CLI, Vitest 5, Vercel CLI, Supabase MCP.
 
-**Spec:** [`PLAN_ESCALABILIDAD_KIDOO.md`](../../../PLAN_ESCALABILIDAD_KIDOO.md) §2–§4 y §12 (K0); decisiones 074, 075, 076, 086 y 088 en [`docs/architecture/decisions.md`](../../architecture/decisions.md).
+**Spec:** [`PLAN_ESCALABILIDAD_NIDLY.md`](../../../PLAN_ESCALABILIDAD_NIDLY.md) §2–§4 y §12 (K0); decisiones 074, 075, 076, 086 y 088 en [`docs/architecture/decisions.md`](../../architecture/decisions.md).
 
 ## Restricciones globales
 

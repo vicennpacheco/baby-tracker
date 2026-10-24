@@ -1,10 +1,10 @@
-# Kidoo
+# Nidly
 
 🇬🇧 [Read in English](./README.md) · 🇪🇸 **Español**
 
 > **SaaS B2C mobile-first** (PWA instalable) para que las familias registren en segundos el día a día de su bebé (tomas, pañales, sueño, crecimiento y salud) y lo **compartan en tiempo real** entre todos sus cuidadores, con datos protegidos en la UE.
 >
-> **Estado (2026-10-24):** el MVP, **«Métricas Bebé»**, está en producción desde el 2026-10-10 y lo usa una familia real en iOS y Android. **Kidoo** es su evolución a SaaS multi-tenant y está **en marcha**: ver [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md). «Kidoo» era un nombre en clave y se ha **descartado** por riesgo de marca; el definitivo está por elegir (decisión 087). El plan se aprobó el 2026-10-24 y la fase **K0** está en marcha.
+> **Estado (2026-10-24):** el MVP, **«Métricas Bebé»**, está en producción desde el 2026-10-10 y lo usa una familia real en iOS y Android. **Nidly** es su evolución a SaaS multi-tenant y está **en marcha**: ver [`PLAN_ESCALABILIDAD_NIDLY.md`](./PLAN_ESCALABILIDAD_NIDLY.md). «Kidoo» era un nombre en clave y se ha **descartado** por riesgo de marca; el definitivo es **Nidly** (decisión 087). El plan se aprobó el 2026-10-24 y la fase **K0** está en marcha.
 
 ---
 
@@ -12,7 +12,7 @@
 
 En los primeros meses con un bebé hay preguntas que el pediatra siempre hace y que, a las 4 de la madrugada, nadie recuerda: ¿cuándo comió por última vez? ¿De qué pecho? ¿Cuántos pañales mojados lleva hoy? ¿Cuánto ha dormido? Y cuando cuidan varias personas, la pregunta se multiplica: ¿ya le diste tú el biberón?
 
-Kidoo es un registro rápido pensado para usarse **con una mano, con poca luz y medio dormido**, compartido por toda la familia: lo que registra un cuidador aparece al instante en el móvil de los demás. Sobre esa base fiable, Kidoo añade lo que hace falta para entender los datos, sin interpretarlos médicamente:
+Nidly es un registro rápido pensado para usarse **con una mano, con poca luz y medio dormido**, compartido por toda la familia: lo que registra un cuidador aparece al instante en el móvil de los demás. Sobre esa base fiable, Nidly añade lo que hace falta para entender los datos, sin interpretarlos médicamente:
 - percentiles de crecimiento de la OMS;
 - un informe para el pediatra;
 - predicción de ventanas de sueño;
@@ -26,7 +26,7 @@ Kidoo es un registro rápido pensado para usarse **con una mano, con poca luz y 
 4. **Pantallas simples en lugar de modales:** cada formulario es una pantalla propia con su botón "Atrás".
 5. **Una sola verdad, en todos los móviles:** los datos viven en la nube y se sincronizan en tiempo real entre todos los dispositivos de la familia.
 6. **Privacidad europea por diseño:** datos y cómputo en la UE, aislamiento estricto entre familias en la base de datos, IA solo con consentimiento y sin entrenamiento con tus datos.
-7. **Nunca un diagnóstico:** Kidoo registra, resume y compara con referencias. Ante cualquier duda, el pediatra.
+7. **Nunca un diagnóstico:** Nidly registra, resume y compara con referencias. Ante cualquier duda, el pediatra.
 
 ### Funcionalidades
 
@@ -50,7 +50,7 @@ Kidoo es un registro rápido pensado para usarse **con una mano, con poca luz y 
 | **Predicción de sueño** | Ventana sugerida para la próxima siesta, explicada | 📐 K8 |
 | **Planes** | Freemium: el registro y la sincronización son gratis | 📐 K9 |
 
-> **Aviso:** Kidoo es una herramienta de registro. No ofrece consejo médico ni diagnostica. Ante cualquier duda, consulta con tu pediatra.
+> **Aviso:** Nidly es una herramienta de registro. No ofrece consejo médico ni diagnostica. Ante cualquier duda, consulta con tu pediatra.
 
 ---
 
@@ -108,7 +108,7 @@ Requisito: **Node.js 24 LTS**. Prisma se fija en **7.x estable**: el tag `latest
   (router.refresh())
 ```
 
-**Kidoo (objetivo):**
+**Nidly (objetivo):**
 - RLS aplicada también a las consultas del servidor (`withTenant` + rol `app_tenant`);
 - `next-intl`;
 - chat sobre el mismo canal privado;
@@ -116,7 +116,7 @@ Requisito: **Node.js 24 LTS**. Prisma se fija en **7.x estable**: el tag `latest
 - informes en Storage privado con enlaces firmados;
 - CI/CD con staging.
 
-El diagrama completo está en [`PLAN_ESCALABILIDAD_KIDOO.md` §5](./PLAN_ESCALABILIDAD_KIDOO.md#5-arquitectura-objetivo).
+El diagrama completo está en [`PLAN_ESCALABILIDAD_NIDLY.md` §5](./PLAN_ESCALABILIDAD_NIDLY.md#5-arquitectura-objetivo).
 
 **Principios:**
 - **Lecturas:** Server Components con Prisma, a través de `features/<módulo>/queries.ts`. Sin API REST interna.
@@ -147,7 +147,7 @@ Modelos Prisma en PascalCase mapeados a tablas y columnas en snake_case (`feedin
 | `SleepPrediction` | Predicción por lotes (V2) | K8 |
 | `Subscription` · `BillingEvent` | Planes | K9 |
 
-Las migraciones previstas (borradores SQL) están en [`PLAN_ESCALABILIDAD_KIDOO.md` §11](./PLAN_ESCALABILIDAD_KIDOO.md#11-migraciones-sql-borradores).
+Las migraciones previstas (borradores SQL) están en [`PLAN_ESCALABILIDAD_NIDLY.md` §11](./PLAN_ESCALABILIDAD_NIDLY.md#11-migraciones-sql-borradores).
 
 ---
 
@@ -180,7 +180,7 @@ baby-tracker/                    # se renombra con la marca definitiva (K9)
 ├── docs/
 │   ├── architecture/decisions.md      # Registro de decisiones (ADR 001–085)
 │   └── superpowers/plans/             # Planes detallados de cada fase
-├── PLAN_ESCALABILIDAD_KIDOO.md  # Visión técnica y orden de desarrollo de Kidoo
+├── PLAN_ESCALABILIDAD_NIDLY.md  # Visión técnica y orden de desarrollo de Nidly
 ├── CLAUDE.md                    # Reglas para Claude (y para cualquier contribuidor)
 ├── AGENTS.md                    # Punto de entrada para agentes de código
 └── .cursor/rules/               # Reglas para Cursor (apuntan a CLAUDE.md)
@@ -199,15 +199,15 @@ baby-tracker/                    # se renombra con la marca definitiva (K9)
 | 3 · UI/UX | Los cinco módulos, onboarding, ajustes, accesibilidad AA | ✅ 2026-10-09 |
 | 4 · Dashboard, sync, PWA y despliegue | «Hoy», Broadcast privado, PWA instalada en iOS y Android, Vercel + Supabase en producción | ✅ 2026-10-12 |
 
-Pendiente del MVP, absorbido por Kidoo:
+Pendiente del MVP, absorbido por Nidly:
 - [ ] Lighthouse de rendimiento y accesibilidad ≥ 90 en producción (incluye el objetivo de 1,5 s en 4G). → K9
 - [ ] Iconos definitivos. → K1 / K9, con la marca
 
 El detalle de cada fase está en los planes de [`docs/superpowers/plans/`](./docs/superpowers/plans/) y en el registro de decisiones 001–072.
 
-### Kidoo — 🚧 en marcha (K0)
+### Nidly — 🚧 en marcha (K0)
 
-Orden estricto; cada fase empieza cuando la anterior cumple su criterio de salida. El detalle está en [`PLAN_ESCALABILIDAD_KIDOO.md` §12](./PLAN_ESCALABILIDAD_KIDOO.md#12-orden-secuencial-estricto-de-desarrollo).
+Orden estricto; cada fase empieza cuando la anterior cumple su criterio de salida. El detalle está en [`PLAN_ESCALABILIDAD_NIDLY.md` §12](./PLAN_ESCALABILIDAD_NIDLY.md#12-orden-secuencial-estricto-de-desarrollo).
 
 - [ ] **K0 · Fundaciones:** etiqueta `v1.0.0-mvp`, `main` protegida, proyecto **staging**, CI con Postgres efímero, migraciones staging → producción con aprobación, `verify-db`, tests fuera de la instancia de producción.
 - [ ] **K1 · i18n y marca:** `next-intl`, `es` + `en`, perfil con idioma y unidades, unidades imperiales, pseudo-idioma de pruebas, nombre e iconos.
@@ -273,7 +273,7 @@ cp .env.example .env          # Hoy: datos del proyecto Supabase; desde K0: los 
 
 ## Contribuir
 
-1. Lee [`CLAUDE.md`](./CLAUDE.md) (arquitectura, convenciones, diseño y seguridad) y la fase en curso de [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md).
+1. Lee [`CLAUDE.md`](./CLAUDE.md) (arquitectura, convenciones, diseño y seguridad) y la fase en curso de [`PLAN_ESCALABILIDAD_NIDLY.md`](./PLAN_ESCALABILIDAD_NIDLY.md).
 2. Trabaja en una rama corta (`feat/…`, `fix/…`, `docs/…`, `db/…`), nunca en `main`, que despliega producción.
 3. Commits en Conventional Commits, en inglés. Una migración por PR, siempre *expand → migrate → contract*.
 4. Si cambias el README, cambia también su versión en inglés (`README.md`) en el mismo commit.

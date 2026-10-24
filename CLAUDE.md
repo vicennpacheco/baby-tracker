@@ -1,22 +1,22 @@
-# CLAUDE.md — Directrices de desarrollo de Kidoo
+# CLAUDE.md — Directrices de desarrollo de Nidly
 
 > **Instrucción permanente para Claude:** lee este archivo **completo** al inicio de cada sesión y **antes de proponer cualquier solución**, diseño o cambio de código. Estas reglas tienen prioridad sobre tus hábitos por defecto. Si una petición contradice alguna regla, dilo explícitamente y propón una alternativa antes de actuar; no rompas una regla en silencio.
 
-> **Kidoo** (nombre en clave **descartado** por riesgo de marca; el definitivo está pendiente, decisión 087) es la evolución del MVP «Métricas Bebé» hacia un SaaS B2C multi-tenant. El MVP está **en producción**; la evolución se planifica en [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md) por fases **K0–K9**.
+> **Nidly** (nombre definitivo desde el 2026-10-24, decisión 087; sustituye al nombre en clave «Kidoo») es la evolución del MVP «Métricas Bebé» hacia un SaaS B2C multi-tenant. El MVP está **en producción**; la evolución se planifica en [`PLAN_ESCALABILIDAD_NIDLY.md`](./PLAN_ESCALABILIDAD_NIDLY.md) por fases **K0–K9**.
 >
-> **Vigencia de las reglas:** las reglas sin marca están **vigentes hoy**. Las marcadas **[Kx]** entran en vigor cuando la fase Kx esté aprobada y su primera tarea fusionada; hasta entonces manda el comportamiento actual. Las decisiones 073–088 están **aprobadas** desde el 2026-10-24 (salvo la 087, nombre pendiente); la fase en curso es **K0**.
+> **Vigencia de las reglas:** las reglas sin marca están **vigentes hoy**. Las marcadas **[Kx]** entran en vigor cuando la fase Kx esté aprobada y su primera tarea fusionada; hasta entonces manda el comportamiento actual. Las decisiones 073–088 están **aprobadas** desde el 2026-10-24 ; la fase en curso es **K0**.
 
 ---
 
 ## 0. Protocolo de trabajo (obligatorio en cada interacción)
 
-1. **Leer contexto:** este archivo completo, el estado de `README.md` y la fase en curso de [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md) (qué está hecho y qué falta). Ante una duda de arquitectura, consultar el [registro de decisiones](./docs/architecture/decisions.md).
+1. **Leer contexto:** este archivo completo, el estado de `README.md` y la fase en curso de [`PLAN_ESCALABILIDAD_NIDLY.md`](./PLAN_ESCALABILIDAD_NIDLY.md) (qué está hecho y qué falta). Ante una duda de arquitectura, consultar el [registro de decisiones](./docs/architecture/decisions.md).
 2. **Ubicar la petición** en el plan (fase K y tarea). Si no encaja, avisar: ¿es alcance nuevo?, ¿va a una fase posterior?, ¿adelanta algo que depende de una fase sin terminar?
 3. **Planificar antes de codificar** cuando el cambio no sea trivial: qué archivos se crean o modifican y qué decisiones implica. Pedir confirmación antes de cambios grandes o difíciles de revertir: esquema de BD, dependencias nuevas, estructura de carpetas, entornos, cambios en estas reglas. Cada fase K tiene su plan detallado en `docs/superpowers/plans/` antes de escribir código.
 4. **Verificar APIs contra las versiones instaladas** (`package.json`), no contra la memoria. Next.js 16, React 19, Prisma 7, Zod 4, Tailwind CSS 4, `@supabase/ssr` y, cuando se instalen, `next-intl` y el Vercel AI SDK cambiaron APIs importantes respecto a versiones anteriores. Ante la duda, consultar la documentación oficial.
 5. **Cerrar el trabajo:** ejecutar `npm run typecheck`, `npm run lint` y los tests relevantes; marcar las casillas del plan y de los README (`README.md` en inglés y `README.es.md` en español, siempre sincronizados en el mismo cambio, decisión 085); añadir al [registro de decisiones](./docs/architecture/decisions.md) cualquier decisión nueva.
 6. **Idioma:** conversar con el usuario en español. Código, identificadores, BD, rutas, commits y comentarios técnicos en inglés. Documentación interna (`CLAUDE.md`, plan, decisiones, planes de fase) en español; el README público en inglés con su versión `README.es.md` (decisión 085). Textos visibles de la UI en español hoy; desde **[K1]**, en catálogos de mensajes por idioma (§2.10), nunca escritos dentro de los componentes.
-7. **Dependencias:** no añadir ninguna sin justificar qué problema resuelve y por qué no basta con lo que ya hay. Las previstas para Kidoo están en el plan (§12); aun así, cada una se confirma al instalarla.
+7. **Dependencias:** no añadir ninguna sin justificar qué problema resuelve y por qué no basta con lo que ya hay. Las previstas para Nidly están en el plan (§12); aun así, cada una se confirma al instalarla.
 8. **Skills primero:** en cada paso, evaluar y ejecutar las skills disponibles antes de escribir una solución propia (ver [0.1](#01-regla-de-alta-prioridad-uso-proactivo-de-skills)).
 9. **MCP para la base de datos:** inspeccionar, verificar migraciones y depurar datos con el MCP de Supabase/PostgreSQL, sin pedir al usuario que ejecute SQL (ver [0.2](#02-regla-de-alta-prioridad-uso-de-mcp-para-la-base-de-datos)).
 10. **Git y entornos:** ver [0.3](#03-git-entornos-y-despliegue).
@@ -89,13 +89,13 @@
 - **[K0]** `main` protegida: solo PR con CI en verde, *rebase and merge*, una migración por PR (decisión 074).
 - **[K0]** Entornos (decisión 075): `production` (proyecto actual), `staging` (proyecto nuevo en la UE, *Previews* de Vercel, desarrollo local) y `ci` (Postgres efímero). Los tests nunca tocan la instancia de producción.
 - **[K0]** Migraciones y lanzamientos (decisiones 076 y 088): Vercel ya no despliega `main` solo. El *workflow* manual `release` migra staging, pide aprobación, migra producción, pasa `verify-db` y solo entonces despliega la app. Siempre **expand → migrate → contract**: toda migración es compatible con el código anterior y con el siguiente.
-- **Trabajo de Kidoo no publicado:** detrás de *feature flags* (§2.12), nunca en ramas de larga vida.
+- **Trabajo de Nidly no publicado:** detrás de *feature flags* (§2.12), nunca en ramas de larga vida.
 
 ---
 
 ## 1. Contexto
 
-- **Producto:** **Kidoo**, SaaS B2C mobile-first (PWA instalable) para registrar y entender el día a día de un bebé: tomas, pañales, sueño, crecimiento y salud, con dashboard diario. Lo usan varias familias, cada una con sus cuidadores, sus bebés y sus datos aislados. Evolución en curso: multi-tenant estricto, varios idiomas, chat familiar, asistente IA (texto y voz), percentiles OMS, informes para el pediatra y predicción de sueño.
+- **Producto:** **Nidly**, SaaS B2C mobile-first (PWA instalable) para registrar y entender el día a día de un bebé: tomas, pañales, sueño, crecimiento y salud, con dashboard diario. Lo usan varias familias, cada una con sus cuidadores, sus bebés y sus datos aislados. Evolución en curso: multi-tenant estricto, varios idiomas, chat familiar, asistente IA (texto y voz), percentiles OMS, informes para el pediatra y predicción de sueño.
 - **Usuarios:** padres, madres y cuidadores (abuelos, canguros), en el móvil, con una mano, a menudo de noche y cansados. **Ven y editan los mismos datos, sincronizados en tiempo real**, según su rol en cada familia.
 - **Prioridad absoluta:** velocidad y fiabilidad del registro, y privacidad de los datos de salud de un menor, por encima de la riqueza de funciones.
 - **Estado:** el MVP (Fases 1–4, «Métricas Bebé») está en producción desde el 2026-10-10 con familias reales. La interfaz conserva el nombre «Métricas Bebé» hasta **[K1]**.
@@ -210,7 +210,7 @@ export async function createDiaperChange(
 - El SQL que Prisma no modela (RLS, políticas, índices parciales, *grants*, *triggers*) se añade en la **misma migración** con `--create-only`.
 - **Expand → migrate → contract** (decisión 076): añadir antes que exigir; borrar en una PR posterior.
 - Tras aplicar, verificar vía MCP (regla 0.2).
-- Todo cambio de esquema se propone primero explicando su impacto. Borradores de las migraciones de Kidoo: plan §11.
+- Todo cambio de esquema se propone primero explicando su impacto. Borradores de las migraciones de Nidly: plan §11.
 
 **Convenciones de esquema:**
 
@@ -265,7 +265,7 @@ export async function createDiaperChange(
 - Indicador de conexión siempre visible cuando no está "en línea" (reconectando · sin conexión).
 - **Sin escritura offline:** sin conexión, los botones de registro (y el chat) se deshabilitan con un mensaje claro. Los UUID generados en el cliente dejan preparada una futura cola offline.
 - Una tabla nueva con datos de la familia recibe el *trigger* `broadcast_household_change` en su migración. **No** se publica en `supabase_realtime`: los `DELETE` de `postgres_changes` llegan a cualquier cuenta sin filtro ni RLS (decisión 066).
-- Notificaciones push **[K3b]**: el aviso nunca incluye contenido (puede ser un dato de salud): «Mensaje nuevo en Kidoo».
+- Notificaciones push **[K3b]**: el aviso nunca incluye contenido (puede ser un dato de salud): «Mensaje nuevo en Nidly».
 
 ### 2.9 Estructura de carpetas y dependencias entre capas
 
@@ -321,7 +321,7 @@ messages/ [K1]        # <locale>/<feature>.json
 ### 2.12 *Feature flags* y planes [K0 / K9]
 
 - *Flags* por entorno en `env.ts` (validados con Zod) y por familia en `household_feature_overrides` **[K2]**. Se leen en el servidor; el cliente solo recibe el resultado.
-- Toda función de Kidoo no publicada se fusiona apagada en producción.
+- Toda función de Nidly no publicada se fusiona apagada en producción.
 - **[K9]** Derechos por plan con `entitlementsFor(tier)` (puro y testeado) y comprobados en el servidor. La UI solo oculta; quien impide es la action.
 
 ---
@@ -442,7 +442,7 @@ export type ActionResult<T = void> =
 - Componentes de ~150 líneas como máximo; si crecen, extraer subcomponentes.
 - Los comentarios explican el **porqué**, no el qué.
 - Sin código muerto ni `console.log` en commits (`console.error` solo en fronteras de error).
-- Tests con Vitest para schemas, servicios, utilidades de fechas, autorización y concurrencia, junto al archivo probado: `*.test.ts` (unit, sin red ni base de datos) y `*.int.test.ts` (integración contra Postgres real: hoy `baby_tracker_test`; desde **[K0]**, la BD efímera de CI o `kidoo_test` en staging, con las factorías de `src/test/factories.ts`).
+- Tests con Vitest para schemas, servicios, utilidades de fechas, autorización y concurrencia, junto al archivo probado: `*.test.ts` (unit, sin red ni base de datos) y `*.int.test.ts` (integración contra Postgres real: hoy `baby_tracker_test`; desde **[K0]**, la BD efímera de CI o `baby_tracker_test` en staging, con las factorías de `src/test/factories.ts`).
 - **Pruebas de mutación** de cada barrera de seguridad o concurrencia: romper el código protegido una vez, ver fallar el test y restaurar.
 - **[K2]** Suite de aislamiento entre familias (tabla × operación × rol × familia ajena) ejecutada **solo con RLS**.
 - Commits con Conventional Commits en inglés: `feat(feeding): add breast timer`, `fix(sleep): split sessions across midnight`.
@@ -541,7 +541,7 @@ export type ActionResult<T = void> =
 - Las credenciales de base de datos (`DATABASE_URL`, `DIRECT_URL`), la clave secreta de Supabase, las credenciales de Vertex AI y las del proveedor de pagos son de servidor: nunca con prefijo `NEXT_PUBLIC_` ni en el bundle del cliente.
 - El service worker nunca cachea respuestas con datos del usuario (decisión 072).
 - Toda entrada se valida en el servidor: las Server Actions son endpoints públicos. Los enlaces públicos (`/r/<token>` **[K5]**) usan tokens aleatorios de los que solo se guarda el hash, con caducidad, revocación y límite de intentos.
-- **Regulación sanitaria:** Kidoo registra, resume y compara con referencias estadísticas. No diagnostica ni recomienda tratamientos. Las funciones predictivas y el asistente se revisan con ese criterio antes de publicarse (plan §13.2).
+- **Regulación sanitaria:** Nidly registra, resume y compara con referencias estadísticas. No diagnostica ni recomienda tratamientos. Las funciones predictivas y el asistente se revisan con ese criterio antes de publicarse (plan §13.2).
 - **Marca y repositorio público:** ni ids de infraestructura, ni hosts de producción, ni datos reales en el repositorio.
 
 ---
@@ -555,7 +555,7 @@ export type ActionResult<T = void> =
 | `npm run typecheck` | `next typegen` + `tsc --noEmit` (decisión 035) |
 | `npm run lint` / `npm run format` / `npm run format:check` | ESLint / Prettier |
 | `npm test` | Vitest: unit + integración (`test:unit` / `test:int` por separado) |
-| `npm run test:db` | Crear y migrar la BD de tests (hoy `baby_tracker_test` en la instancia de producción, decisión 068; **[K0]** `kidoo_test` en staging) |
+| `npm run test:db` | Crear y migrar la BD de tests (hoy `baby_tracker_test` en la instancia de producción, decisión 068; **[K0]** `baby_tracker_test` en staging) |
 | `npx prisma migrate dev --name <nombre>` | Nueva migración (**solo dev/staging**; hoy no existe, decisión 068) |
 | `npx prisma migrate dev --create-only --name <nombre>` | Crear la migración sin aplicarla, para añadir SQL (RLS, índices parciales…) |
 | `npx prisma migrate deploy` | Aplicar migraciones (**[K0]** solo desde CI: staging → producción con aprobación) |
