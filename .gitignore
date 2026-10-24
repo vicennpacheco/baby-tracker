@@ -36,8 +36,12 @@ next-env.d.ts
 # prisma (generated client)
 /src/generated/
 
-# claude code (per-user settings)
-.claude/settings.local.json
+# claude code: local settings, worktrees, logs and personal memory stay out
+# of the public repo; only the shared launcher and vendored skills are tracked
+.claude/*
+!.claude/launch.json
+!.claude/skills/
+CLAUDE.local.md
 
 # superpowers plan workspaces (ledgers, briefs)
 /.superpowers/

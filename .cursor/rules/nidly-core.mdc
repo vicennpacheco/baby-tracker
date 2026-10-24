@@ -1,0 +1,21 @@
+---
+description: Reglas base de Nidly (SaaS multi-tenant de registro de bebés). Siempre activas; la fuente de verdad es CLAUDE.md.
+alwaysApply: true
+---
+
+# Nidly · reglas base
+
+**Fuente de verdad:** `CLAUDE.md` en la raíz del repositorio. Léelo antes de proponer cambios. Si esta regla discrepa de él, manda `CLAUDE.md`. Plan y fases: `PLAN_ESCALABILIDAD_NIDLY.md`. Decisiones: `docs/architecture/decisions.md`.
+
+- Conversación con el usuario en español. Código, BD, rutas, commits y comentarios en inglés. Textos de UI en español hoy y en catálogos `messages/<locale>/` desde la fase K1.
+- Datos de salud de menores: aislamiento por familia en cada query y action (`requireMember()`), RLS en todas las tablas y nada de datos reales fuera de producción.
+- Next.js 16 App Router: Server Components por defecto, `"use client"` en la hoja más baja, sin `useEffect` + `fetch` para cargar datos. Verifica las APIs en `node_modules/next/dist/docs/` y en `package.json`, no de memoria.
+- Escrituras solo con Server Actions (`features/<m>/actions.ts`): entrada `unknown`, Zod en el servidor y `ActionResult`; altas idempotentes con UUID del cliente; `revalidatePath` del módulo y de `/`.
+- Prisma 7: cliente desde `@/generated/prisma/client`. Cambios de esquema solo con Prisma Migrate (`--create-only` para el SQL de RLS, *grants* y *triggers*), siempre *expand → migrate → contract*. Nunca `db push` ni migraciones contra producción desde local.
+- Realtime: canal privado `household:<id>` con señal `{table, op}`, debounce y `router.refresh()`. Nunca datos por el socket.
+- TypeScript estricto: sin `any`, `!` ni `@ts-ignore`; `switch` exhaustivo con `assertNever`; tipos derivados de Zod y Prisma.
+- Fechas en UTC y días en la zona de la familia (`src/lib/dates.ts`). Medidas como enteros con unidad (`weightGrams`, `amountMl`).
+- UI mobile-first (360–390 px), objetivos ≥ 48 px, pantallas propias en lugar de modales, modo oscuro, WCAG AA y solo tokens CSS.
+- IA (desde K6): Gemini en Vertex AI UE, consentimiento por familia, herramientas de solo lectura, salida validada con los mismos esquemas Zod y confirmación humana. El modelo nunca escribe ni diagnostica.
+- No añadir dependencias sin justificarlas. No trabajar en `main` (despliega producción). Secretos, ids de infraestructura y hosts de producción, nunca en el repositorio.
+- Antes de dar algo por hecho: `npm run typecheck`, `npm run lint` y `npm test`.

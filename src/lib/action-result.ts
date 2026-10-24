@@ -1,4 +1,7 @@
+import { captureException } from "@sentry/nextjs";
 import { z } from "zod";
+
+import { sanitizeError } from "@/lib/sentry-privacy";
 
 // Single contract for every Server Action (CLAUDE.md §3.3). Isomorphic on
 // purpose: client components import these types to read action results.
@@ -86,6 +89,11 @@ export function handleActionError(
   console.error(`[${actionName}] failed`, {
     name: error instanceof Error ? error.name : typeof error,
     code,
+  });
+  // Same rule as the log line: the name, the code and the frames, never the
+  // message (decision 086). A no-op while Sentry is not initialized.
+  captureException(sanitizeError(error, code), {
+    tags: { action: actionName },
   });
   return actionError("UNEXPECTED", UNEXPECTED_MESSAGE);
 }

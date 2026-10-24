@@ -69,9 +69,10 @@ export const config = {
     // Everything except static assets, image optimization and the PWA's
     // public files: the browser fetches the manifest, the service worker,
     // the icons and the offline page without the session, and a redirect
-    // to /login would break installing the app (decision 072). Anchored, so
-    // a future route that merely starts with one of these names still
-    // refreshes the session.
-    "/((?!_next/static|_next/image|favicon.ico|manifest\\.webmanifest$|sw\\.js$|icon/|apple-icon$|offline$|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // to /login would break installing the app (decision 072). The Sentry
+    // tunnel (/monitoring, decision 086) carries error reports, also from
+    // signed-out pages. Anchored, so a future route that merely starts with
+    // one of these names still refreshes the session.
+    "/((?!_next/static|_next/image|favicon.ico|manifest\\.webmanifest$|sw\\.js$|icon/|apple-icon$|offline$|monitoring$|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

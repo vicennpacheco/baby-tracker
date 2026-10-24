@@ -1,3 +1,4 @@
+import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -39,4 +40,28 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Error monitoring (decision 086). Build-time only: the runtime setup lives in
+// src/instrumentation*.ts. Every Sentry endpoint used here is in the EU.
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
+
+export default withSentryConfig(nextConfig, {
+  org: "nidly",
+  project: process.env.SENTRY_PROJECT,
+  // Source map uploads go to the EU region's API, never to sentry.io (US).
+  sentryUrl: "https://de.sentry.io/",
+  authToken: sentryAuthToken,
+  // Browser events reach Sentry through this app (Vercel, cdg1) instead of
+  // straight from the device: they stay in Europe end to end and ad blockers
+  // do not drop them. Excluded from the proxy matcher (src/proxy.ts).
+  tunnelRoute: "/monitoring",
+  // The build plugin's own usage telemetry would go to Sentry's US region.
+  telemetry: false,
+  silent: !process.env.CI,
+  // Readable stack traces only when a token is configured (Vercel, CI);
+  // local builds without one skip the upload instead of failing. Uploaded
+  // maps are deleted from the build output, so they are never served.
+  sourcemaps: {
+    disable: sentryAuthToken ? false : "disable-upload",
+    deleteSourcemapsAfterUpload: true,
+  },
+});
