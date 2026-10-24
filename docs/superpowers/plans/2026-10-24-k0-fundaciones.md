@@ -42,16 +42,16 @@
 - Produce `isLoopbackUrl(url: string): boolean`: `true` si el *hostname* es `localhost`, `127.0.0.1` o `::1`.
 - Produce `assertSafeTestTarget(url: string, devProjectRef: string | undefined): void`: acepta *loopback*; si no, exige `assertDevProject(url, devProjectRef)`; sin *ref* y sin *loopback*, lanza `Refusing to continue`.
 
-- [ ] **Paso 1 — tests que fallan:**
+- [x] **Paso 1 — tests que fallan:**
   - `accepts a loopback database without a project ref` (`postgresql://postgres:pg@127.0.0.1:5432/postgres`, `undefined`);
   - `accepts the dev project` (URL Supavisor con `.abcdefghijklmnopqrst`);
   - `refuses a remote host without a project ref`;
   - `refuses a remote host named like loopback` (`postgresql://localhost:pw@db.example.com:5432/localhost`);
   - `isLoopbackUrl` con `[::1]` → `true`.
-- [ ] **Paso 2:** `npx vitest run --project unit scripts/database-url.test.ts` → FALLA (no existe la función).
-- [ ] **Paso 3:** implementar con `new URL(url).hostname` (sin corchetes para IPv6).
-- [ ] **Paso 4:** los tests pasan; prueba de mutación: aceptar cualquier host → el test del host remoto falla. Restaurar.
-- [ ] **Paso 5:** commit `test(db): allow resetting only loopback or dev test databases`.
+- [x] **Paso 2:** `npx vitest run --project unit scripts/database-url.test.ts` → FALLA (no existe la función).
+- [x] **Paso 3:** implementar con `new URL(url).hostname` (sin corchetes para IPv6).
+- [x] **Paso 4:** los tests pasan; prueba de mutación: aceptar cualquier host → el test del host remoto falla. Restaurar.
+- [x] **Paso 5:** commit `test(db): allow resetting only loopback or dev test databases`.
 
 ### Tarea 2: `test:db` sin `.env` y *stubs* con los roles de Supabase
 
@@ -63,9 +63,9 @@
 - `test-db.ts` carga `.env` solo si existe; `SEED_DEV_PROJECT_REF` es opcional (obligatorio salvo con *loopback*, vía la guarda).
 - `shadow-stubs.sql` crea `anon` y `authenticated` (`NOLOGIN`) solo si no existen (bloque `DO` sobre `pg_roles`). En Supabase ya existen: no hace nada.
 
-- [ ] **Paso 1:** cambios; `npm run typecheck` en verde.
-- [ ] **Paso 2:** comprobar que en Supabase sigue siendo idempotente: el bloque `DO` no ejecuta `CREATE ROLE` porque los roles existen (lectura de `pg_roles` vía MCP, sin escribir).
-- [ ] **Paso 3:** commit `chore(test): run test:db without .env and stub Supabase roles`.
+- [x] **Paso 1:** cambios; `npm run typecheck` en verde.
+- [x] **Paso 2:** comprobar que en Supabase sigue siendo idempotente: el bloque `DO` no ejecuta `CREATE ROLE` porque los roles existen (lectura de `pg_roles` vía MCP, sin escribir).
+- [x] **Paso 3:** commit `chore(test): run test:db without .env and stub Supabase roles`.
 
 ### Tarea 3: CI en cada PR (`.github/workflows/ci.yml`)
 
@@ -80,9 +80,9 @@
 - Variables de CI (no son secretos): `DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:6543/postgres?pgbouncer=true`, `DIRECT_URL=…:5432/postgres`, `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_ci`.
 - Permisos mínimos (`contents: read`). Acciones fijadas a versión mayor oficial (`actions/checkout`, `actions/setup-node`).
 
-- [ ] **Paso 1:** escribir el *workflow*.
-- [ ] **Paso 2:** validar el YAML localmente (parseo) y revisar cada comando contra `package.json`.
-- [ ] **Paso 3:** commit `ci: run checks and integration tests on an ephemeral Postgres`.
+- [x] **Paso 1:** escribir el *workflow*.
+- [x] **Paso 2:** validar el YAML localmente (parseo) y revisar cada comando contra `package.json`.
+- [x] **Paso 3:** commit `ci: run checks and integration tests on an ephemeral Postgres`.
 - [ ] **Paso 4 (requiere push, con permiso):** abrir PR y ver la CI en verde. Si el contenedor no trae el certificado *snakeoil*, generar uno en el paso con `openssl`.
 
 ### Tarea 4: `verify-db` (regla 0.2 en código)
@@ -96,7 +96,7 @@
 - `checkDatabase(snapshot: DatabaseSnapshot): CheckResult[]`, con `type CheckResult = { name: string; status: "pass" | "fail" | "skipped"; detail?: string }`.
 - `verify-db.ts` usa `VERIFY_DATABASE_URL` o `DIRECT_URL` y **solo ejecuta `SELECT`**; termina con código 1 si hay algún `fail`.
 
-- [ ] **Paso 1 — tests que fallan:**
+- [x] **Paso 1 — tests que fallan:**
   - todo correcto → todo `pass`;
   - una migración pendiente o sin carpeta → `fail`;
   - una tabla sin RLS → `fail` con su nombre;
@@ -104,9 +104,9 @@
   - una tabla publicada → `fail`;
   - `realtimeAvailable: false` → `skipped` en particiones;
   - `tenantRoleBypassesRls: null` → `skipped`.
-- [ ] **Paso 2:** implementar `checkDatabase` y después el lector SQL (`pg_tables`, `pg_trigger`, `pg_publication_tables`, `pg_inherits` sobre `realtime.messages`, `pg_roles`).
-- [ ] **Paso 3:** `npm run db:verify` contra producción (**solo lectura**) → todo `pass` o `skipped`.
-- [ ] **Paso 4:** prueba de mutación de una comprobación; restaurar. Commit `feat(db): verify migrations, RLS and realtime from a script`.
+- [x] **Paso 2:** implementar `checkDatabase` y después el lector SQL (`pg_tables`, `pg_trigger`, `pg_publication_tables`, `pg_inherits` sobre `realtime.messages`, `pg_roles`).
+- [x] **Paso 3:** `npm run db:verify` contra producción (**solo lectura**) → todo `pass` o `skipped`.
+- [x] **Paso 4:** prueba de mutación de una comprobación; restaurar. Commit `feat(db): verify migrations, RLS and realtime from a script`.
 
 ### Tarea 5: lanzamiento manual a producción (decisión 088)
 
@@ -120,7 +120,7 @@
   3. `deploy-production` (entorno `production`): `vercel pull --environment=production`, `vercel build --prod`, `vercel deploy --prebuilt --prod`.
 - *Secrets* por entorno (los crea el usuario): `DIRECT_URL`, `DATABASE_CA_CERT`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
 
-- [ ] **Paso 1:** escribir los dos archivos; commit `ci: release to production by hand after migrating and verifying`.
+- [x] **Paso 1:** escribir los dos archivos; commit `ci: release to production by hand after migrating and verifying`.
 - [ ] **Paso 2 (usuario):** crear los entornos `staging` y `production` en GitHub (revisor obligatorio en `production`), los *secrets* y la protección de `main`.
 - [ ] **Paso 3:** primer lanzamiento de prueba sin migraciones nuevas. **Ojo:** al fusionar `vercel.json` en `main`, producción deja de desplegarse sola.
 
@@ -146,9 +146,16 @@
 
 ### Tarea 9: rescatar trabajo archivado
 
-- [ ] Recuperar el `.gitignore` de `archive/worktree-chore-gitignore-commit-authorship` (ignora `.claude/*` salvo `launch.json` y `skills/`). La regla de autoría ya está en `CLAUDE.md` §0.3.
+- [x] Recuperar el `.gitignore` de `archive/worktree-chore-gitignore-commit-authorship` (ignora `.claude/*` salvo `launch.json` y `skills/`). La regla de autoría ya está en `CLAUDE.md` §0.3.
 - [ ] **Arreglo pendiente:** `archive/determined-merkle-a87617` contiene `callAction` y el aviso de «conexión perdida». Hoy, si la red cae durante una Server Action, la app muestra la pantalla de error en vez de un aviso. Se reaplica en su propia rama (`fix/dropped-connection-toast`), rebasada sobre `main`, renumerando su decisión.
-- [ ] `archive/laughing-keller-bb5a50` (refresco al volver sin conexión) **no se rescata**: `RefreshOnFocus` fue sustituido por `RealtimeSync` (decisión 066), que ya tiene en cuenta la conexión.
+- [x] `archive/laughing-keller-bb5a50` (refresco al volver sin conexión) **no se rescata**: `RefreshOnFocus` fue sustituido por `RealtimeSync` (decisión 066), que ya tiene en cuenta la conexión.
+
+### Estado (2026-10-24)
+
+- Hecho: tareas 1–5 (salvo lo que exige push o configuración del usuario), limpieza de ramas (etiquetas `archive/*`), etiqueta `v1.0.0-mvp` y `.gitignore` recuperado.
+- **Hotfix de seguridad** fuera de plan (rama `fix/security-patches`, también aplicado aquí): Next.js 16.4.0 → 16.4.3 (ejecución remota de código y DoS críticos), Prisma 7.10.1 y Zod 4.6.7; `npm audit` sin vulnerabilidades. Producción sigue en 16.4.0 hasta desplegarlo.
+- `db:verify` en producción (solo lectura): todo en verde salvo un **aviso**: aún no existe la partición de hoy de `realtime.messages`, que Realtime crea con la primera conexión del día.
+- Bloqueado, a la espera del usuario: crear staging (0 $/mes), push y PR, entornos y *secrets* de GitHub, protección de `main`, cuenta de Sentry UE, borrar `baby_tracker_test` de producción.
 
 **Salida de K0:**
 - una PR pasa la CI completa;
