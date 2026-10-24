@@ -8,6 +8,7 @@ import { FormFooter } from "@/components/shared/form-footer";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { createHouseholdInvite } from "@/features/household/actions";
 import { InviteCodeDisplay } from "@/features/household/components/invite-code-display";
+import { callAction } from "@/lib/call-action";
 
 type InviteCodePanelProps = {
   /** "mañana a las 14:30" when a usable code exists; it can't be shown again. */
@@ -24,7 +25,7 @@ export function InviteCodePanel({
 
   function generateCode(): void {
     startTransition(async () => {
-      const result = await createHouseholdInvite();
+      const result = await callAction(() => createHouseholdInvite());
       if (result.ok) {
         setCode(result.data.code);
         return;

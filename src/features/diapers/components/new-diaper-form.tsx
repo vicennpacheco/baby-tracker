@@ -21,6 +21,7 @@ import {
   diaperChangeSchemas,
   type CreateDiaperChangeInput,
 } from "@/features/diapers/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type NewDiaperFormProps = {
@@ -52,7 +53,7 @@ export function NewDiaperForm({
 
   function onSubmit(values: CreateDiaperChangeInput): void {
     startTransition(async () => {
-      const result = await createDiaperChange(values);
+      const result = await callAction(() => createDiaperChange(values));
       if (result.ok) {
         offerUndo({
           message: "Pañal guardado",

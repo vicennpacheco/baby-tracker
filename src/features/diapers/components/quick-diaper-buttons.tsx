@@ -12,6 +12,7 @@ import {
 import { DIAPER_TYPE_ICONS } from "@/features/diapers/components/diaper-type-icons";
 import { DIAPER_TYPE_LABELS } from "@/features/diapers/labels";
 import type { DiaperType } from "@/generated/prisma/enums";
+import { callAction } from "@/lib/call-action";
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { useSingleFlight } from "@/lib/use-single-flight";
 
@@ -31,7 +32,9 @@ export function QuickDiaperButtons({ babyId }: { babyId: string }): ReactNode {
     const id = crypto.randomUUID();
     const isStarted = run(async () => {
       try {
-        const result = await createDiaperChange({ id, babyId, type });
+        const result = await callAction(() =>
+          createDiaperChange({ id, babyId, type }),
+        );
         if (result.ok) {
           offerUndo({
             message: `Pañal ${DIAPER_TYPE_LABELS[type].toLowerCase()} guardado`,

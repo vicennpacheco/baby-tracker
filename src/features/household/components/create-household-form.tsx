@@ -23,6 +23,7 @@ import {
   createHouseholdSchema,
   type CreateHouseholdInput,
 } from "@/features/household/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 const FIELDS = ["displayName", "babyName", "babyBirthDate", "babySex"] as const;
@@ -85,7 +86,7 @@ export function CreateHouseholdForm({
   function onSubmit(values: CreateHouseholdInput): void {
     startTransition(async () => {
       // On success the action redirects home, so only failures come back.
-      const result = await createHousehold(values);
+      const result = await callAction(() => createHousehold(values));
       if (result.ok) return;
       const { message, fieldErrors } = result.error;
       if (!applyFieldErrors(form.setError, FIELDS, fieldErrors)) {

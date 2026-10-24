@@ -17,6 +17,7 @@ import {
 } from "@/features/sleep/components/running-sleep-card";
 import { StartSleepButtons } from "@/features/sleep/components/start-sleep-buttons";
 import type { ActionError } from "@/lib/action-result";
+import { callAction } from "@/lib/call-action";
 import { formatDuration, formatTime } from "@/lib/dates";
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { useSingleFlight } from "@/lib/use-single-flight";
@@ -47,16 +48,20 @@ export function SleepTimerBar({
   const isDisabled = isBusy || !isOnline;
 
   // The other parent may have started, stopped or deleted it meanwhile: show
-  // why, then the current state.
+  // why, then the current state. Not after an unexpected failure: offline, a
+  // failed refresh makes Next.js fall back to a full page load, i.e. the
+  // service worker's offline page. RealtimeSync refreshes once back online.
   function reportAndRefresh(error: ActionError): void {
     toast.error(error.message);
-    router.refresh();
+    if (error.code !== "UNEXPECTED") router.refresh();
   }
 
   function start(minutesAgo?: number): void {
     const id = crypto.randomUUID();
     run(async () => {
-      const result = await startSleepSession({ id, babyId, minutesAgo });
+      const result = await callAction(() =>
+        startSleepSession({ id, babyId, minutesAgo }),
+      );
       if (!result.ok) return reportAndRefresh(result.error);
       // The server may have moved a late start to the end of the previous
       // sleep: tell the time it actually stored.
@@ -74,7 +79,7 @@ export function SleepTimerBar({
 
   function stop(sleep: RunningSleep): void {
     run(async () => {
-      const result = await stopSleepSession({ id: sleep.id });
+      const result = await callAction(() => stopSleepSession({ id: sleep.id }));
       if (!result.ok) return reportAndRefresh(result.error);
       const { startedAt, endedAt, wasAlreadyStopped } = result.data;
       if (wasAlreadyStopped || !endedAt) {

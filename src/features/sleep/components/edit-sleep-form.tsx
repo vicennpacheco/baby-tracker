@@ -17,6 +17,7 @@ import {
   sleepSessionSchemas,
   type UpdateSleepSessionInput,
 } from "@/features/sleep/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type EditSleepFormProps = {
@@ -49,7 +50,7 @@ export function EditSleepForm({
 
   function onSubmit(values: UpdateSleepSessionInput): void {
     startTransition(async () => {
-      const result = await updateSleepSession(values);
+      const result = await callAction(() => updateSleepSession(values));
       if (result.ok) {
         toast.success("Cambios guardados");
         router.replace(returnHref);

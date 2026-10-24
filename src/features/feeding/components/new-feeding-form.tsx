@@ -19,6 +19,7 @@ import {
   type CreateFeedingInput,
 } from "@/features/feeding/schemas";
 import type { BottleContent, FeedingType } from "@/generated/prisma/enums";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 export type NewFeedingDefaults = {
@@ -59,7 +60,7 @@ export function NewFeedingForm({
 
   function onSubmit(values: CreateFeedingInput): void {
     startTransition(async () => {
-      const result = await createFeeding(values);
+      const result = await callAction(() => createFeeding(values));
       if (result.ok) {
         offerUndo({
           message:

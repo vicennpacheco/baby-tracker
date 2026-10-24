@@ -17,6 +17,7 @@ import {
   diaperChangeSchemas,
   type UpdateDiaperChangeInput,
 } from "@/features/diapers/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type EditDiaperFormProps = {
@@ -47,7 +48,7 @@ export function EditDiaperForm({
 
   function onSubmit(values: UpdateDiaperChangeInput): void {
     startTransition(async () => {
-      const result = await updateDiaperChange(values);
+      const result = await callAction(() => updateDiaperChange(values));
       if (result.ok) {
         toast.success("Cambios guardados");
         router.replace(returnHref);

@@ -17,6 +17,7 @@ import {
   growthMeasurementSchemas,
   type UpdateGrowthMeasurementInput,
 } from "@/features/growth/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type EditGrowthFormProps = {
@@ -45,7 +46,7 @@ export function EditGrowthForm({
 
   function onSubmit(values: UpdateGrowthMeasurementInput): void {
     startTransition(async () => {
-      const result = await updateGrowthMeasurement(values);
+      const result = await callAction(() => updateGrowthMeasurement(values));
       if (result.ok) {
         toast.success("Cambios guardados");
         router.replace("/growth");

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { removeHouseholdMember } from "@/features/household/actions";
+import { callAction } from "@/lib/call-action";
 import { useOnlineStatus } from "@/lib/use-online-status";
 
 type RemoveMemberButtonProps = {
@@ -41,7 +42,7 @@ export function RemoveMemberButton({
 
   function remove(): void {
     startTransition(async () => {
-      const result = await removeHouseholdMember({ userId });
+      const result = await callAction(() => removeHouseholdMember({ userId }));
       if (result.ok) {
         setIsOpen(false);
         toast.success(`${displayName} ya no está en la familia`);

@@ -20,6 +20,7 @@ import { StartFeedingButtons } from "@/features/feeding/components/start-feeding
 import { FEEDING_TYPE_LABELS } from "@/features/feeding/labels";
 import { type BreastSide, getOppositeBreast } from "@/features/feeding/service";
 import type { ActionError } from "@/lib/action-result";
+import { callAction } from "@/lib/call-action";
 import { formatDuration } from "@/lib/dates";
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { useSingleFlight } from "@/lib/use-single-flight";
@@ -51,16 +52,20 @@ export function BreastTimerBar({
   const isDisabled = isBusy || !isOnline;
 
   // The other parent may have started, stopped or deleted it meanwhile: show
-  // why, then the current state.
+  // why, then the current state. Not after an unexpected failure: offline, a
+  // failed refresh makes Next.js fall back to a full page load, i.e. the
+  // service worker's offline page. RealtimeSync refreshes once back online.
   function reportAndRefresh(error: ActionError): void {
     toast.error(error.message);
-    router.refresh();
+    if (error.code !== "UNEXPECTED") router.refresh();
   }
 
   function start(side: BreastSide): void {
     const id = crypto.randomUUID();
     run(async () => {
-      const result = await startFeeding({ id, babyId, type: side });
+      const result = await callAction(() =>
+        startFeeding({ id, babyId, type: side }),
+      );
       if (!result.ok) return reportAndRefresh(result.error);
       offerUndo({
         message: `${FEEDING_TYPE_LABELS[side]} en marcha`,
@@ -72,7 +77,7 @@ export function BreastTimerBar({
 
   function stop(feeding: RunningFeeding): void {
     run(async () => {
-      const result = await stopFeeding({ id: feeding.id });
+      const result = await callAction(() => stopFeeding({ id: feeding.id }));
       if (!result.ok) return reportAndRefresh(result.error);
       const { startedAt, endedAt, wasAlreadyStopped } = result.data;
       if (wasAlreadyStopped || !endedAt) {
@@ -90,7 +95,9 @@ export function BreastTimerBar({
     // breast in one transaction, or does neither.
     const id = crypto.randomUUID();
     run(async () => {
-      const result = await switchFeedingSide({ activeId: feeding.id, id });
+      const result = await callAction(() =>
+        switchFeedingSide({ activeId: feeding.id, id }),
+      );
       if (!result.ok) return reportAndRefresh(result.error);
       toast.success(
         `Cambiado a ${FEEDING_TYPE_LABELS[getOppositeBreast(feeding.type)].toLowerCase()}`,

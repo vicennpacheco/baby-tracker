@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 import type { ActionResult } from "@/lib/action-result";
+import { callAction } from "@/lib/call-action";
 
 const UNDO_DURATION_MS = 6000;
 
@@ -24,7 +25,7 @@ export function offerUndo({
     action: {
       label: "Deshacer",
       onClick: () => {
-        void undo().then((result) => {
+        void callAction(undo).then((result) => {
           if (result.ok) {
             toast.success(undoneMessage);
           } else {
