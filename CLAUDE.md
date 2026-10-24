@@ -563,6 +563,7 @@ export type ActionResult<T = void> =
 | `npx prisma migrate status` | Estado de las migraciones |
 | `npx prisma db seed` | Datos de ejemplo (**solo dev/staging**) |
 | `npx prisma studio` | Explorar la BD |
+| `node --env-file=.env.staging <comando>` | Cualquier comando contra **staging** (p. ej. `node --env-file=.env.staging node_modules/prisma/build/index.js migrate deploy`, `… --import tsx scripts/verify-db.ts`, `… node_modules/vitest/vitest.mjs run`): `.env.staging` se carga primero y `.env` nunca lo sobrescribe |
 | **[K0]** `npx tsx scripts/verify-db.ts` | Comprobaciones de la regla 0.2 contra un entorno |
 | **[K4]** `npm run reference:load` | Cargar o actualizar las tablas de referencia OMS |
 

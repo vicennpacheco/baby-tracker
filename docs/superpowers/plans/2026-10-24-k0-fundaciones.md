@@ -128,10 +128,12 @@
 
 - [x] Crear el proyecto vía MCP (organización Free, **0 $/mes**), región eu-west-3: `nidly-staging`, creado el 2026-10-24.
 - [x] `supabase-bootstrap.sql` secciones 1–4 vía MCP. La sección 5 (política de `realtime.messages`) va **después** de la primera migración, porque usa `public.is_household_member`.
-- [ ] Usuario: desactivar la Data API en el panel.
+- [x] Contraseña del rol `prisma` generada en local y escrita solo en `.env.staging` (nunca en el chat); asignada por el usuario en el SQL Editor (2026-10-24).
+- [ ] Usuario: desactivar la Data API en el panel. Hoy sigue activa en staging (PostgREST responde `42501` a `anon`); producción ya no expone el esquema.
 - [x] Crear el rol `prisma` según la guía de Supabase, **sin contraseña** (no puede iniciar sesión hasta que el usuario se la asigne con `alter role prisma with password '…'` en el editor SQL).
-- [ ] Usuario: SMTP, plantillas con `{{ .Token }}`, OTP de 8 dígitos y las variables `.env` y *Preview* de Vercel.
-- [ ] `prisma migrate deploy` + `db:verify` + `test:db` contra staging; `npm test` completo contra staging.
+- [x] Secretos de GitHub (`DIRECT_URL`, `DATABASE_CA_CERT`) en los entornos `staging` y `production` (usuario).
+- [ ] Usuario: SMTP, plantillas con `{{ .Token }}`, OTP de 8 dígitos y las variables *Preview* de Vercel.
+- [x] `prisma migrate deploy` (3 migraciones), sección 5 del *bootstrap* por MCP, verificación de la regla 0.2 por MCP (RLS, 9 políticas `SELECT`, 2 índices parciales, 5 *triggers*, nada publicado, solo `SELECT` para `authenticated`), particiones de Realtime creadas conectando un cliente, `db:verify` todo en verde, *advisors*: 0 de seguridad y solo «índices sin usar» (sin tráfico), `test:db` y `npm test` **588/588 contra staging** (2026-10-24). Comandos: `node --env-file=.env.staging …` (los scripts cargan `.env` sin sobrescribir).
 - [ ] Seed sintético multi-familia (tarea separada, con su propio commit).
 
 ### Tarea 7: Sentry UE (bloqueada hasta tener la cuenta)
