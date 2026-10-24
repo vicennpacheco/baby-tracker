@@ -4,7 +4,7 @@
 
 > **Mobile-first B2C SaaS** (installable PWA) that lets families log their baby's day in seconds (feedings, diapers, sleep, growth and health) and **share it in real time** with every caregiver, with data protected in the EU.
 >
-> **Status (2026-10-24):** the MVP, **"Métricas Bebé"**, has been in production since 2026-10-10 and is used by a real family on iOS and Android. **Kidoo** is its evolution into a multi-tenant SaaS and is in the **planning phase**: see [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md) (in Spanish). "Kidoo" is a **codename** until the trademark is cleared (decision 073).
+> **Status (2026-10-24):** the MVP, **"Métricas Bebé"**, has been in production since 2026-10-10 and is used by a real family on iOS and Android. **Kidoo** is its evolution into a multi-tenant SaaS and is **under way**: see [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md) (in Spanish). "Kidoo" was a codename and has been **dropped** because of trademark risk; the final name is being chosen (decision 087). The plan was approved on 2026-10-24 and phase **K0** is in progress.
 
 ---
 
@@ -219,7 +219,7 @@ Left over from the MVP, taken over by Kidoo:
 
 Each phase is detailed in the plans in [`docs/superpowers/plans/`](./docs/superpowers/plans/) and in decisions 001–072.
 
-### Kidoo — 📐 planning
+### Kidoo — 🚧 in progress (K0)
 
 Strict order: each phase starts when the previous one meets its exit criteria. Details in [`PLAN_ESCALABILIDAD_KIDOO.md` §12](./PLAN_ESCALABILIDAD_KIDOO.md#12-orden-secuencial-estricto-de-desarrollo).
 

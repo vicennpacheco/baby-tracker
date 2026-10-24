@@ -4,7 +4,7 @@
 
 > **SaaS B2C mobile-first** (PWA instalable) para que las familias registren en segundos el día a día de su bebé (tomas, pañales, sueño, crecimiento y salud) y lo **compartan en tiempo real** entre todos sus cuidadores, con datos protegidos en la UE.
 >
-> **Estado (2026-10-24):** el MVP, **«Métricas Bebé»**, está en producción desde el 2026-10-10 y lo usa una familia real en iOS y Android. **Kidoo** es su evolución a SaaS multi-tenant y está en **fase de planificación**: ver [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md). «Kidoo» es un **nombre en clave** hasta verificar la marca (decisión 073).
+> **Estado (2026-10-24):** el MVP, **«Métricas Bebé»**, está en producción desde el 2026-10-10 y lo usa una familia real en iOS y Android. **Kidoo** es su evolución a SaaS multi-tenant y está **en marcha**: ver [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md). «Kidoo» era un nombre en clave y se ha **descartado** por riesgo de marca; el definitivo está por elegir (decisión 087). El plan se aprobó el 2026-10-24 y la fase **K0** está en marcha.
 
 ---
 
@@ -205,7 +205,7 @@ Pendiente del MVP, absorbido por Kidoo:
 
 El detalle de cada fase está en los planes de [`docs/superpowers/plans/`](./docs/superpowers/plans/) y en el registro de decisiones 001–072.
 
-### Kidoo — 📐 en planificación
+### Kidoo — 🚧 en marcha (K0)
 
 Orden estricto; cada fase empieza cuando la anterior cumple su criterio de salida. El detalle está en [`PLAN_ESCALABILIDAD_KIDOO.md` §12](./PLAN_ESCALABILIDAD_KIDOO.md#12-orden-secuencial-estricto-de-desarrollo).
 

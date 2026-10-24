@@ -1,6 +1,6 @@
 # Plan de escalabilidad: de «Métricas Bebé» a Kidoo
 
-> **Estado:** propuesta del 2026-10-24, **pendiente de aprobación**. No se escribe código funcional hasta aprobarla.
+> **Estado:** **aprobado** el 2026-10-24 (decisiones 073–088). Fase en curso: **K0**. «Kidoo» queda descartado como nombre (087); se mantiene en este documento hasta elegir el definitivo.
 > **Autoría:** revisión de arquitectura (Staff) y de producto sobre el MVP desplegado (`main` en `cff4e4d`, Fase 4 cerrada el 2026-10-12).
 > **Decisiones asociadas:** 073–085 en [`docs/architecture/decisions.md`](./docs/architecture/decisions.md), todas en estado «Propuesta».
 
@@ -1117,7 +1117,9 @@ Las versiones se fijan y se verifican contra la documentación oficial al instal
 
 ## 15. Decisiones que necesito de ti antes de K0
 
-**Ya decidido (2026-10-24):** multidioma justo después de K0 (fase K1, antes del multi-tenant), con español e inglés en la primera versión, y README bilingüe para el portfolio (`README.md` en inglés y `README.es.md` en español, decisión 085).
+**Respuestas del usuario (2026-10-24):** D1 «Kidoo» descartado, propuestas de nombre en la decisión 087; D2 staging por MCP, con confirmación del coste antes de crearlo; D3 **promoción manual desde GitHub** tras verificar la migración (088); D4 **Sentry en la región UE**, sin que la telemetría salga de Europa (086); D5 roles aprobados.
+
+**Ya decidido antes (2026-10-24):** multidioma justo después de K0 (fase K1, antes del multi-tenant), con español e inglés en la primera versión, y README bilingüe para el portfolio (`README.md` en inglés y `README.es.md` en español, decisión 085).
 
 | # | Decisión | Mi recomendación |
 |---|---|---|

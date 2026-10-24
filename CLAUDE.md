@@ -2,9 +2,9 @@
 
 > **Instrucción permanente para Claude:** lee este archivo **completo** al inicio de cada sesión y **antes de proponer cualquier solución**, diseño o cambio de código. Estas reglas tienen prioridad sobre tus hábitos por defecto. Si una petición contradice alguna regla, dilo explícitamente y propón una alternativa antes de actuar; no rompas una regla en silencio.
 
-> **Kidoo** (nombre en clave, decisión 073) es la evolución del MVP «Métricas Bebé» hacia un SaaS B2C multi-tenant. El MVP está **en producción**; la evolución se planifica en [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md) por fases **K0–K9**.
+> **Kidoo** (nombre en clave **descartado** por riesgo de marca; el definitivo está pendiente, decisión 087) es la evolución del MVP «Métricas Bebé» hacia un SaaS B2C multi-tenant. El MVP está **en producción**; la evolución se planifica en [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md) por fases **K0–K9**.
 >
-> **Vigencia de las reglas:** las reglas sin marca están **vigentes hoy**. Las marcadas **[Kx]** entran en vigor cuando la fase Kx esté aprobada y su primera tarea fusionada; hasta entonces manda el comportamiento actual. Las decisiones 073–084 están en estado **Propuesta** hasta que el usuario las apruebe; la 085 (README bilingüe) ya está aprobada.
+> **Vigencia de las reglas:** las reglas sin marca están **vigentes hoy**. Las marcadas **[Kx]** entran en vigor cuando la fase Kx esté aprobada y su primera tarea fusionada; hasta entonces manda el comportamiento actual. Las decisiones 073–088 están **aprobadas** desde el 2026-10-24 (salvo la 087, nombre pendiente); la fase en curso es **K0**.
 
 ---
 
@@ -88,7 +88,7 @@
 - **Sin push ni PR** salvo que el usuario lo pida. Commits atómicos en Conventional Commits en inglés, firmados solo por el usuario.
 - **[K0]** `main` protegida: solo PR con CI en verde, *rebase and merge*, una migración por PR (decisión 074).
 - **[K0]** Entornos (decisión 075): `production` (proyecto actual), `staging` (proyecto nuevo en la UE, *Previews* de Vercel, desarrollo local) y `ci` (Postgres efímero). Los tests nunca tocan la instancia de producción.
-- **[K0]** Migraciones (decisión 076): `prisma migrate deploy` desde CI, primero en staging y luego en producción con aprobación manual. Siempre **expand → migrate → contract**: toda migración es compatible con el código anterior y con el siguiente.
+- **[K0]** Migraciones y lanzamientos (decisiones 076 y 088): Vercel ya no despliega `main` solo. El *workflow* manual `release` migra staging, pide aprobación, migra producción, pasa `verify-db` y solo entonces despliega la app. Siempre **expand → migrate → contract**: toda migración es compatible con el código anterior y con el siguiente.
 - **Trabajo de Kidoo no publicado:** detrás de *feature flags* (§2.12), nunca en ramas de larga vida.
 
 ---
@@ -530,7 +530,7 @@ export type ActionResult<T = void> =
 - Son **datos de salud de menores alojados en la nube** (RGPD art. 9):
   - proyectos de Supabase y cómputo en **regiones de la UE**;
   - acceso solo para miembros autenticados de cada familia, según su rol (2.7);
-  - **terceros solo los aprobados como subencargados** en el registro de decisiones: hoy Supabase y Vercel; Google Cloud (Vertex AI) **[K6]** y el proveedor de pagos **[K9]** cuando se aprueben, con DPA firmado. Sin analítica de terceros, sin fuentes con rastreo y sin SDKs de publicidad.
+  - **terceros solo los aprobados como subencargados** en el registro de decisiones: hoy Supabase y Vercel; Sentry en su región UE **[K0]** (decisión 086: sin datos personales ni de salud, sin *Session Replay*, a través de un *tunnel route* propio); Google Cloud (Vertex AI) **[K6]** y el proveedor de pagos **[K9]** cuando se aprueben, con DPA firmado. Sin analítica de terceros, sin fuentes con rastreo y sin SDKs de publicidad.
 - **EIPD** (evaluación de impacto) aprobada antes de **[K6]** y antes del lanzamiento **[K9]**.
 - **Consentimientos separados y revocables:** registro y compartir con la familia (alta), IA **[K6]**, notificaciones **[K3b]**.
 - **Derechos de los usuarios:** exportar los datos de la familia, eliminar la familia (ya existe, decisión 071) y eliminar la cuenta **[K2/K9]**.
