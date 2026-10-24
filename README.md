@@ -1,266 +1,299 @@
 # Kidoo
 
-> **SaaS B2C mobile-first** (PWA instalable) para que las familias registren en segundos el día a día de su bebé (tomas, pañales, sueño, crecimiento y salud) y lo **compartan en tiempo real** entre todos sus cuidadores, con datos protegidos en la UE.
+🇬🇧 **English** · 🇪🇸 [Leer en español](./README.es.md)
+
+> **Mobile-first B2C SaaS** (installable PWA) that lets families log their baby's day in seconds (feedings, diapers, sleep, growth and health) and **share it in real time** with every caregiver, with data protected in the EU.
 >
-> **Estado (2026-10-24):** el MVP, **«Métricas Bebé»**, está en producción desde el 2026-10-10 y lo usa una familia real en iOS y Android. **Kidoo** es su evolución a SaaS multi-tenant y está en **fase de planificación**: ver [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md). «Kidoo» es un **nombre en clave** hasta verificar la marca (decisión 073).
+> **Status (2026-10-24):** the MVP, **"Métricas Bebé"**, has been in production since 2026-10-10 and is used by a real family on iOS and Android. **Kidoo** is its evolution into a multi-tenant SaaS and is in the **planning phase**: see [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md) (in Spanish). "Kidoo" is a **codename** until the trademark is cleared (decision 073).
 
 ---
 
-## Descripción
+## Overview
 
-En los primeros meses con un bebé hay preguntas que el pediatra siempre hace y que, a las 4 de la madrugada, nadie recuerda: ¿cuándo comió por última vez? ¿De qué pecho? ¿Cuántos pañales mojados lleva hoy? ¿Cuánto ha dormido? Y cuando cuidan varias personas, la pregunta se multiplica: ¿ya le diste tú el biberón?
+In the first months with a baby there are questions the pediatrician always asks and that nobody remembers at 4 a.m.: when did the baby last eat? Which breast? How many wet diapers today? How long did the baby sleep? And when several people take care of the baby, the questions multiply: did you already give the bottle?
 
-Kidoo es un registro rápido pensado para usarse **con una mano, con poca luz y medio dormido**, compartido por toda la familia: lo que registra un cuidador aparece al instante en el móvil de los demás. Sobre esa base fiable, Kidoo añade lo que hace falta para entender los datos, sin interpretarlos médicamente:
-- percentiles de crecimiento de la OMS;
-- un informe para el pediatra;
-- predicción de ventanas de sueño;
-- un asistente IA que registra por texto o voz con tu confirmación.
+Kidoo is a quick log designed to be used **one-handed, in low light and half asleep**, shared by the whole family: what one caregiver logs shows up instantly on everyone else's phone. On top of that reliable base, Kidoo adds what you need to understand the data, without interpreting it medically:
+- WHO growth percentiles;
+- a report for the pediatrician;
+- sleep window predictions;
+- an AI assistant that logs from text or voice, with your confirmation.
 
-### Principios de producto
+### Product principles
 
-1. **Registrar en ≤ 3 toques** desde la pantalla de inicio las acciones frecuentes (toma, pañal, sueño). Con voz o texto libre, en uno.
-2. **Una mano, poca luz:** botones grandes, acciones principales al alcance del pulgar y modo oscuro desde el primer día.
-3. **Valores por defecto inteligentes:** hora = ahora, sugerir el pecho contrario al último, recordar la última cantidad de biberón.
-4. **Pantallas simples en lugar de modales:** cada formulario es una pantalla propia con su botón "Atrás".
-5. **Una sola verdad, en todos los móviles:** los datos viven en la nube y se sincronizan en tiempo real entre todos los dispositivos de la familia.
-6. **Privacidad europea por diseño:** datos y cómputo en la UE, aislamiento estricto entre familias en la base de datos, IA solo con consentimiento y sin entrenamiento con tus datos.
-7. **Nunca un diagnóstico:** Kidoo registra, resume y compara con referencias. Ante cualquier duda, el pediatra.
+1. **Log in ≤ 3 taps** from the home screen for frequent actions (feeding, diaper, sleep). With voice or free text, in one.
+2. **One hand, low light:** big buttons, primary actions within thumb reach and dark mode from day one.
+3. **Smart defaults:** time = now, suggest the breast opposite to the last one, remember the last bottle amount.
+4. **Simple screens instead of modals:** every form is its own screen with a "Back" button.
+5. **One truth, on every phone:** data lives in the cloud and syncs in real time across all of the family's devices.
+6. **European privacy by design:**
+   - data and compute in the EU;
+   - strict isolation between families in the database;
+   - AI only with consent, and never trained on your data.
+7. **Never a diagnosis:** Kidoo logs, summarizes and compares with references. When in doubt, ask your pediatrician.
 
-### Funcionalidades
+### Features
 
-| Módulo | Qué hace | Estado |
+| Module | What it does | Status |
 |---|---|---|
-| **Familia y acceso** | Login con email y código, crear familia y bebé (asistente en dos pasos), invitar con código de un solo uso, expulsar, salir y eliminar la familia | ✅ En producción |
-| **Alimentación** | Pecho izq./der. con cronómetro compartido y pecho sugerido; biberón con ml y tipo de leche | ✅ En producción |
-| **Pañales** | Mojado / sucio / mixto en un toque; color y textura de las heces | ✅ En producción |
-| **Sueño** | Cronómetro compartido, inicio tardío («hace 10 min») y entrada manual | ✅ En producción |
-| **Crecimiento** | Peso, longitud y perímetro craneal con la variación de peso | ✅ En producción |
-| **Salud** | Vacunas y medicamentos con dosis y reacciones; repetir un medicamento en un toque | ✅ En producción |
-| **Hoy** | Última toma, totales del día, cronómetros activos, navegación entre días | ✅ En producción |
-| **Sincronización y PWA** | Tiempo real entre dispositivos; instalable en iOS y Android; página sin conexión | ✅ En producción |
-| **Multi-tenant** | Varias familias por usuario, roles (propietario, miembro, cuidador, solo lectura), aislamiento por RLS en el servidor | 📐 K1 |
-| **Idiomas** | Español e inglés al lanzar; unidades métricas o imperiales | 📐 K2 |
-| **Chat familiar** | Mensajes entre los cuidadores de la familia, en tiempo real | 📐 K3 |
-| **Percentiles OMS** | Curvas de crecimiento con edad corregida para prematuros | 📐 K4 |
-| **Informe para el pediatra** | PDF del periodo y enlace temporal para compartir | 📐 K5 |
-| **Asistente IA** | Registro por texto natural y preguntas sobre los datos del bebé, con confirmación | 📐 K6 |
-| **Voz** | Registro dictado, a una mano | 📐 K7 |
-| **Predicción de sueño** | Ventana sugerida para la próxima siesta, explicada | 📐 K8 |
-| **Planes** | Freemium: el registro y la sincronización son gratis | 📐 K9 |
+| **Family & access** | Email + code login, create a family and baby (two-step wizard), invite with a single-use code, remove a member, leave and delete the family | ✅ In production |
+| **Feeding** | Left/right breast with a shared timer and suggested side; bottle with ml and milk type | ✅ In production |
+| **Diapers** | Wet / dirty / mixed in one tap; stool color and consistency | ✅ In production |
+| **Sleep** | Shared timer, late start ("10 min ago") and manual entry | ✅ In production |
+| **Growth** | Weight, length and head circumference with weight change | ✅ In production |
+| **Health** | Vaccines and medications with dose and reactions; repeat a medication in one tap | ✅ In production |
+| **Today** | Last feeding, daily totals, running timers, day navigation | ✅ In production |
+| **Sync & PWA** | Real time across devices; installable on iOS and Android; offline page | ✅ In production |
+| **Languages** | Spanish and English in the first version; metric or imperial units | 📐 K1 |
+| **Multi-tenant** | Several families per user, roles (owner, member, caregiver, view-only), RLS isolation on the server | 📐 K2 |
+| **Family chat** | Messages between the family's caregivers, in real time | 📐 K3 |
+| **WHO percentiles** | Growth curves with corrected age for preterm babies | 📐 K4 |
+| **Pediatrician report** | PDF for a period and a time-limited share link | 📐 K5 |
+| **AI assistant** | Natural-language logging and questions about the baby's data, with confirmation | 📐 K6 |
+| **Voice** | Dictated logging, one-handed | 📐 K7 |
+| **Sleep prediction** | Explained suggested window for the next nap | 📐 K8 |
+| **Plans** | Freemium: logging and sync are free | 📐 K9 |
 
-> **Aviso:** Kidoo es una herramienta de registro. No ofrece consejo médico ni diagnostica. Ante cualquier duda, consulta con tu pediatra.
+> **Disclaimer:** Kidoo is a logging tool. It does not give medical advice or diagnoses. When in doubt, ask your pediatrician.
 
 ---
 
-## Stack tecnológico
+## Engineering highlights
 
-| Capa | Tecnología | Estado | Rol |
+- **Concurrency solved in the database:**
+  - two caregivers can start the same nap at the same time and only one is created (partial unique index);
+  - stopping a timer is idempotent, and double taps never create duplicates (client-generated UUIDs);
+  - all of it is tested with real collisions against Postgres.
+- **Real time without leaks:** a trigger sends only `{table, op}` over a **private** Broadcast channel, and each device re-reads from the server. `postgres_changes` was dropped because its `DELETE` events reached any account (decision 066).
+- **Layered security:**
+  - authorization on the server in every query and action;
+  - RLS on every table and the Data API disabled;
+  - in phase K2, RLS also for server queries (`SET LOCAL ROLE` per transaction).
+- **Correct dates in any time zone:** UTC in the database, "today" computed in the family's time zone, and sessions that cross midnight split between both days.
+- **Risk-free PWA:** a hand-written service worker that never stores family data; installable on iOS and Android.
+- **Measurable quality:**
+  - strict TypeScript;
+  - 545 tests, with integration tests against real Postgres;
+  - mutation checks for every security barrier;
+  - verified WCAG AA;
+  - 85 documented architecture decisions.
+
+---
+
+## Tech stack
+
+| Layer | Technology | Status | Role |
 |---|---|---|---|
-| Framework | **Next.js** 16 (App Router, Cache Components) | En uso | Routing, Server Components, Server Actions |
-| UI runtime | React 19 | En uso | `useTransition`, `useOptimistic` |
-| Lenguaje | **TypeScript** (modo estricto) | En uso | Tipado de extremo a extremo |
-| Estilos y componentes | **Tailwind CSS** 4 + **shadcn/ui** (Base UI) | En uso | Tokens de diseño en CSS, componentes accesibles |
-| Base de datos | **Supabase PostgreSQL** (eu-west-3) | En uso | Fuente única de verdad |
-| ORM | **Prisma** 7 + `@prisma/adapter-pg` | En uso | Esquema, migraciones y cliente tipado |
-| Autenticación | Supabase Auth + `@supabase/ssr` | En uso | OTP por email, sesión en cookies |
-| Tiempo real | Supabase Realtime (Broadcast privado) | En uso | Señal de cambios por familia |
-| Validación y formularios | **Zod** 4, React Hook Form | En uso | Esquemas compartidos cliente/servidor |
-| Fechas | date-fns + `@date-fns/tz` | En uso | Días en la zona horaria de la familia |
-| Tests | Vitest | En uso | Unit + integración contra Postgres real |
-| Hosting | Vercel (`cdg1`, París) | En uso | Funciones en la UE |
-| CI/CD | GitHub Actions | 📐 K0 | CI en cada PR, migraciones staging → producción |
-| i18n | `next-intl` | 📐 K2 | Mensajes ICU por idioma, sin prefijo en las rutas |
-| Almacenamiento | Supabase Storage | 📐 K5 | Informes PDF privados |
-| PDF | `@react-pdf/renderer` | 📐 K5 | Informe para el pediatra |
-| IA | Vercel AI SDK + **Gemini en Vertex AI (UE)** | 📐 K6 | Salida estructurada, herramientas de solo lectura |
-| Vectores | `pgvector` | 📐 K6 | Corpus de guías curado |
-| Pagos | Por decidir (recomendado Stripe) | 📐 K9 | Suscripciones por familia |
+| Framework | **Next.js** 16 (App Router, Cache Components) | In use | Routing, Server Components, Server Actions |
+| UI runtime | React 19 | In use | `useTransition`, `useOptimistic` |
+| Language | **TypeScript** (strict mode) | In use | End-to-end typing |
+| Styling & components | **Tailwind CSS** 4 + **shadcn/ui** (Base UI) | In use | Design tokens in CSS, accessible components |
+| Database | **Supabase PostgreSQL** (eu-west-3) | In use | Single source of truth |
+| ORM | **Prisma** 7 + `@prisma/adapter-pg` | In use | Schema, migrations and typed client |
+| Authentication | Supabase Auth + `@supabase/ssr` | In use | Email OTP, cookie session |
+| Real time | Supabase Realtime (private Broadcast) | In use | Per-family change signal |
+| Validation & forms | **Zod** 4, React Hook Form | In use | Schemas shared by client and server |
+| Dates | date-fns + `@date-fns/tz` | In use | Days in the family's time zone |
+| Tests | Vitest | In use | Unit + integration against real Postgres |
+| Hosting | Vercel (`cdg1`, Paris) | In use | Functions in the EU |
+| CI/CD | GitHub Actions | 📐 K0 | CI on every PR, staging → production migrations |
+| i18n | `next-intl` | 📐 K1 | ICU messages per language, no locale prefix in routes |
+| Storage | Supabase Storage | 📐 K5 | Private PDF reports |
+| PDF | `@react-pdf/renderer` | 📐 K5 | Pediatrician report |
+| AI | Vercel AI SDK + **Gemini on Vertex AI (EU)** | 📐 K6 | Structured output, read-only tools |
+| Vectors | `pgvector` | 📐 K6 | Curated guidance corpus |
+| Payments | To be decided (Stripe recommended) | 📐 K9 | Per-family subscriptions |
 
-Requisito: **Node.js 24 LTS**. Prisma se fija en **7.x estable**: el tag `latest` de npm apunta a una RC de Prisma 8. Las versiones de las dependencias nuevas se verifican al instalarlas.
+Requirement: **Node.js 24 LTS**. Prisma is pinned to **stable 7.x**, because npm's `latest` tag points to a Prisma 8 release candidate. Versions of new dependencies are verified when they are installed.
 
 ---
 
-## Arquitectura
+## Architecture
 
-**Hoy (MVP en producción):**
+**Today (MVP in production):**
 
 ```
-  Móvil A / Móvil B (PWA)            Servidor Next.js (Vercel, UE)       Supabase (UE)
-  ───────────────────────            ─────────────────────────────       ─────────────
+  Phone A / Phone B (PWA)            Next.js server (Vercel, EU)         Supabase (EU)
+  ───────────────────────            ───────────────────────────         ─────────────
   Client Components                  Server Actions                      PostgreSQL
-  (formularios, cronómetros) ──────▶ auth → Zod → Prisma ───────────▶   (fuente de verdad, RLS)
+  (forms, timers)       ───────────▶ auth → Zod → Prisma ───────────▶   (source of truth, RLS)
            ▲                         Server Components   DATABASE_URL        │ triggers
            │ HTML/RSC ◀──────────── queries (Prisma)     pooler :6543        ▼
-  RealtimeSync ◀──── WebSocket privado household:<id> ◀──────────── Realtime Broadcast ({table, op})
+  RealtimeSync ◀──── private WebSocket household:<id> ◀──────────── Realtime Broadcast ({table, op})
   (router.refresh())
 ```
 
-**Kidoo (objetivo):**
-- RLS aplicada también a las consultas del servidor (`withTenant` + rol `app_tenant`);
+**Kidoo (target):**
+- RLS also applied to server queries (`withTenant` + `app_tenant` role);
 - `next-intl`;
-- chat sobre el mismo canal privado;
-- asistente con Gemini en Vertex AI (UE), con herramientas de solo lectura y confirmación humana;
-- informes en Storage privado con enlaces firmados;
-- CI/CD con staging.
+- chat over the same private channel;
+- an assistant using Gemini on Vertex AI (EU), with read-only tools and human confirmation;
+- reports in private Storage with signed links;
+- CI/CD with a staging environment.
 
-El diagrama completo está en [`PLAN_ESCALABILIDAD_KIDOO.md` §5](./PLAN_ESCALABILIDAD_KIDOO.md#5-arquitectura-objetivo).
+The full diagram is in [`PLAN_ESCALABILIDAD_KIDOO.md` §5](./PLAN_ESCALABILIDAD_KIDOO.md#5-arquitectura-objetivo).
 
-**Principios:**
-- **Lecturas:** Server Components con Prisma, a través de `features/<módulo>/queries.ts`. Sin API REST interna.
-- **Escrituras:** Server Actions que comprueban la sesión, la familia y el rol, validan con Zod, escriben, revalidan y devuelven un `ActionResult<T>` tipado. Ni el cliente ni la IA escriben directamente.
-- **Sincronización:** Realtime es solo una señal de «hay cambios». Cada dispositivo vuelve a leer del servidor, y ningún dato de salud viaja por el socket.
-- **Seguridad:** autorización en el servidor en cada query y action, RLS en todas las tablas, Data API desactivada y datos en la UE.
+**Principles:**
+- **Reads:** Server Components with Prisma, through `features/<module>/queries.ts`. No internal REST API.
+- **Writes:** Server Actions that check the session, family and role, validate with Zod, write, revalidate and return a typed `ActionResult<T>`. Neither the client nor the AI writes directly.
+- **Sync:** Realtime is only a "something changed" signal. Each device re-reads from the server, and no health data travels over the socket.
+- **Security:** server-side authorization in every query and action, RLS on every table, Data API disabled and data in the EU.
 
-Las reglas detalladas de arquitectura, código y diseño están en [`CLAUDE.md`](./CLAUDE.md), y las decisiones en [`docs/architecture/decisions.md`](./docs/architecture/decisions.md).
+The detailed architecture, code and design rules are in [`CLAUDE.md`](./CLAUDE.md), and the decisions in [`docs/architecture/decisions.md`](./docs/architecture/decisions.md) (both in Spanish).
 
 ---
 
-## Modelo de datos
+## Data model
 
-Modelos Prisma en PascalCase mapeados a tablas y columnas en snake_case (`feedings.baby_id`). IDs `uuid` (generados en el cliente para que las altas sean idempotentes), fechas `timestamptz` (UTC) y medidas como **enteros con la unidad en el nombre**.
+Prisma models in PascalCase mapped to snake_case tables and columns (`feedings.baby_id`). `uuid` ids (generated on the client so creates are idempotent), `timestamptz` dates (UTC) and measurements stored as **integers with the unit in the field name**.
 
-| Modelo | Campos principales | Estado |
+| Model | Main fields | Status |
 |---|---|---|
-| `Household` | `name` (+ `timeZone` en K1) | En uso |
-| `HouseholdMember` | `householdId`, `userId`, `role`, `displayName` | En uso (N:M y roles en K1) |
-| `HouseholdInvite` | `householdId`, `codeHash`, `expiresAt`, `usedAt?` (+ `role` en K1) | En uso |
-| `Baby` | `householdId`, `name`, `birthDate`, `sex?` (+ `gestationalAgeWeeks`, `updatedById` en K1) | En uso |
-| `Feeding` · `DiaperChange` · `SleepSession` · `GrowthMeasurement` · `HealthRecord` | Registros del bebé con `babyId`, `createdById`, `updatedById` | En uso |
+| `Household` | `name` (+ `timeZone` in K2) | In use |
+| `HouseholdMember` | `householdId`, `userId`, `role`, `displayName` | In use (N:M and roles in K2) |
+| `HouseholdInvite` | `householdId`, `codeHash`, `expiresAt`, `usedAt?` (+ `role` in K2) | In use |
+| `Baby` | `householdId`, `name`, `birthDate`, `sex?` (+ `gestationalAgeWeeks`, `updatedById` in K2) | In use |
+| `Feeding` · `DiaperChange` · `SleepSession` · `GrowthMeasurement` · `HealthRecord` | Baby records with `babyId`, `createdById`, `updatedById` | In use |
 | `Profile` | `locale`, `measurementSystem` | K1 |
-| `HouseholdMessage` · `HouseholdMessageRead` | Chat familiar | K3 |
-| `GrowthReferenceLms` | Tablas OMS (L, M, S) | K4 |
-| `ReportExport` · `ReportShareLink` | Informes y enlaces | K5 |
-| `AiConsent` · `AiUsage` · `AiInteraction` · `KnowledgeChunk` | Asistente IA | K6 |
-| `SleepPrediction` | Predicción por lotes (V2) | K8 |
-| `Subscription` · `BillingEvent` | Planes | K9 |
+| `HouseholdMessage` · `HouseholdMessageRead` | Family chat | K3 |
+| `GrowthReferenceLms` | WHO tables (L, M, S) | K4 |
+| `ReportExport` · `ReportShareLink` | Reports and links | K5 |
+| `AiConsent` · `AiUsage` · `AiInteraction` · `KnowledgeChunk` | AI assistant | K6 |
+| `SleepPrediction` | Batch prediction (V2) | K8 |
+| `Subscription` · `BillingEvent` | Plans | K9 |
 
-Las migraciones previstas (borradores SQL) están en [`PLAN_ESCALABILIDAD_KIDOO.md` §11](./PLAN_ESCALABILIDAD_KIDOO.md#11-migraciones-sql-borradores).
+The planned migrations (SQL drafts) are in [`PLAN_ESCALABILIDAD_KIDOO.md` §11](./PLAN_ESCALABILIDAD_KIDOO.md#11-migraciones-sql-borradores).
 
 ---
 
-## Estructura del proyecto
+## Project structure
 
 ```
-baby-tracker/                    # se renombra con la marca definitiva (K9)
+baby-tracker/                    # renamed with the final brand (K9)
 ├── prisma/
-│   ├── schema.prisma            # Modelos (las URLs van en prisma.config.ts, Prisma 7)
-│   ├── migrations/              # SQL de Prisma + RLS, índices parciales, grants y triggers
-│   ├── platform/                # supabase-bootstrap.sql (una vez por proyecto, como postgres) y shadow-stubs.sql
-│   └── seed.ts                  # Solo dev/staging
-├── prisma.config.ts             # DIRECT_URL para la CLI de Prisma
-├── public/sw.js                 # Service worker manual (nunca guarda datos de la familia)
-├── scripts/                     # BD de tests; verify-db.ts (K0); carga de referencias OMS (K4)
+│   ├── schema.prisma            # Models (URLs live in prisma.config.ts, Prisma 7)
+│   ├── migrations/              # Prisma SQL + RLS, partial indexes, grants and triggers
+│   ├── platform/                # supabase-bootstrap.sql (once per project, as postgres) and shadow-stubs.sql
+│   └── seed.ts                  # Dev/staging only
+├── prisma.config.ts             # DIRECT_URL for the Prisma CLI
+├── public/sw.js                 # Hand-written service worker (never stores family data)
+├── scripts/                     # Test DB; verify-db.ts (K0); WHO reference loader (K4)
 ├── src/
-│   ├── proxy.ts                 # Refresco de la sesión de Supabase
-│   ├── app/                     # Solo routing y composición
+│   ├── proxy.ts                 # Supabase session refresh
+│   ├── app/                     # Routing and composition only
 │   │   ├── (auth)/              # login/, join/
-│   │   ├── (app)/(tabs)/        # Con barra inferior: Hoy, Tomas, Pañales, Sueño, Más…
-│   │   ├── (app)/(task)/        # Sin barra: altas, ediciones, invitación…
-│   │   ├── offline/             # Página «Sin conexión»
-│   │   └── manifest.ts          # Manifiesto de la PWA
-│   ├── features/<módulo>/       # schemas · queries · actions · service · labels · components
+│   │   ├── (app)/(tabs)/        # With the bottom bar: Today, Feeding, Diapers, Sleep, More…
+│   │   ├── (app)/(task)/        # Without the bar: create, edit, invite…
+│   │   ├── offline/             # "Offline" page
+│   │   └── manifest.ts          # PWA manifest
+│   ├── features/<module>/       # schemas · queries · actions · service · labels · components
 │   ├── components/              # ui/ (shadcn) · layout/ · shared/
-│   ├── i18n/                    # next-intl (K2)
-│   ├── lib/                     # supabase/, db.ts, tenant-db.ts (K1), env.ts, dates.ts…
-│   └── generated/prisma/        # Cliente Prisma generado (no editar)
-├── messages/<locale>/           # Catálogos de mensajes (K2)
+│   ├── i18n/                    # next-intl (K1)
+│   ├── lib/                     # supabase/, db.ts, tenant-db.ts (K2), env.ts, dates.ts…
+│   └── generated/prisma/        # Generated Prisma client (do not edit)
+├── messages/<locale>/           # Message catalogs (K1)
 ├── docs/
-│   ├── architecture/decisions.md      # Registro de decisiones (ADR 001–084)
-│   └── superpowers/plans/             # Planes detallados de cada fase
-├── PLAN_ESCALABILIDAD_KIDOO.md  # Visión técnica y orden de desarrollo de Kidoo
-├── CLAUDE.md                    # Reglas para Claude (y para cualquier contribuidor)
-├── AGENTS.md                    # Punto de entrada para agentes de código
-└── .cursor/rules/               # Reglas para Cursor (apuntan a CLAUDE.md)
+│   ├── architecture/decisions.md      # Architecture decision log (ADR 001–085)
+│   └── superpowers/plans/             # Detailed plan for each phase
+├── PLAN_ESCALABILIDAD_KIDOO.md  # Kidoo technical vision and development order
+├── CLAUDE.md                    # Rules for Claude (and for any contributor)
+├── AGENTS.md                    # Entry point for coding agents
+└── .cursor/rules/               # Cursor rules (point to CLAUDE.md)
 ```
 
 ---
 
 ## Roadmap
 
-### MVP «Métricas Bebé» — ✅ terminado (2026-10-07 → 2026-10-12)
+### MVP "Métricas Bebé" — ✅ done (2026-10-07 → 2026-10-12)
 
-| Fase | Contenido | Estado |
+| Phase | Scope | Status |
 |---|---|---|
-| 1 · Setup, BD y auth | Next.js 16, Prisma 7 sobre Supabase UE, RLS, login OTP, `requireMember()` | ✅ |
-| 2 · Backend | Actions idempotentes, cronómetros seguros ante concurrencia, resumen diario, invitaciones (ADR-043), 337 tests | ✅ |
-| 3 · UI/UX | Los cinco módulos, onboarding, ajustes, accesibilidad AA | ✅ 2026-10-09 |
-| 4 · Dashboard, sync, PWA y despliegue | «Hoy», Broadcast privado, PWA instalada en iOS y Android, Vercel + Supabase en producción | ✅ 2026-10-12 |
+| 1 · Setup, DB and auth | Next.js 16, Prisma 7 on Supabase EU, RLS, OTP login, `requireMember()` | ✅ |
+| 2 · Backend | Idempotent actions, concurrency-safe timers, daily summary, invites (ADR-043), 337 tests | ✅ |
+| 3 · UI/UX | All five modules, onboarding, settings, AA accessibility | ✅ 2026-10-09 |
+| 4 · Dashboard, sync, PWA and deploy | "Today", private Broadcast, PWA installed on iOS and Android, Vercel + Supabase in production | ✅ 2026-10-12 |
 
-Pendiente del MVP, absorbido por Kidoo:
-- [ ] Lighthouse de rendimiento y accesibilidad ≥ 90 en producción (incluye el objetivo de 1,5 s en 4G). → K9
-- [ ] Iconos definitivos. → K2 / K9, con la marca
+Left over from the MVP, taken over by Kidoo:
+- [ ] Lighthouse performance and accessibility ≥ 90 in production (including the 1.5 s on 4G target). → K9
+- [ ] Final icons. → K1 / K9, together with the brand
 
-El detalle de cada fase está en los planes de [`docs/superpowers/plans/`](./docs/superpowers/plans/) y en el registro de decisiones 001–072.
+Each phase is detailed in the plans in [`docs/superpowers/plans/`](./docs/superpowers/plans/) and in decisions 001–072.
 
-### Kidoo — 📐 en planificación
+### Kidoo — 📐 planning
 
-Orden estricto; cada fase empieza cuando la anterior cumple su criterio de salida. El detalle está en [`PLAN_ESCALABILIDAD_KIDOO.md` §12](./PLAN_ESCALABILIDAD_KIDOO.md#12-orden-secuencial-estricto-de-desarrollo).
+Strict order: each phase starts when the previous one meets its exit criteria. Details in [`PLAN_ESCALABILIDAD_KIDOO.md` §12](./PLAN_ESCALABILIDAD_KIDOO.md#12-orden-secuencial-estricto-de-desarrollo).
 
-- [ ] **K0 · Fundaciones:** etiqueta `v1.0.0-mvp`, `main` protegida, proyecto **staging**, CI con Postgres efímero, migraciones staging → producción con aprobación, `verify-db`, tests fuera de la instancia de producción.
-- [ ] **K1 · Multi-tenant:** varias familias por usuario, roles, familia activa, zona horaria por familia, **RLS aplicada al servidor** (`withTenant`), suite de aislamiento.
-- [ ] **K2 · i18n y marca:** `next-intl`, `es` + `en`, unidades imperiales, nombre e iconos.
-- [ ] **K3 · Chat familiar** (y Web Push opcional).
-- [ ] **K4 · Percentiles OMS** con edad corregida.
-- [ ] **K5 · Informe PDF** para el pediatra con enlace temporal.
-- [ ] **K6 · Asistente IA** por texto (requiere EIPD y DPA aprobados).
-- [ ] **K7 · Registro por voz.**
-- [ ] **K8 · Predicción de ventanas de sueño.**
-- [ ] **K9 · Monetización y lanzamiento:** planes, legal, marca, Lighthouse.
+- [ ] **K0 · Foundations:**
+  - `v1.0.0-mvp` tag and protected `main`;
+  - a **staging** project;
+  - CI with an ephemeral Postgres;
+  - staging → production migrations with manual approval and `verify-db`;
+  - tests moved out of the production instance.
+- [ ] **K1 · i18n and brand:** `next-intl`, `es` + `en`, profile with language and units, imperial units, test pseudo-locale, name and icons.
+- [ ] **K2 · Multi-tenant:** several families per user, roles, active family, per-family time zone, **RLS enforced on the server** (`withTenant`), isolation test suite.
+- [ ] **K3 · Family chat** (optional Web Push).
+- [ ] **K4 · WHO percentiles** with corrected age.
+- [ ] **K5 · PDF report** for the pediatrician with a time-limited link.
+- [ ] **K6 · AI assistant** for text (requires an approved DPIA and DPA).
+- [ ] **K7 · Voice logging.**
+- [ ] **K8 · Sleep window prediction.**
+- [ ] **K9 · Monetization and launch:** plans, legal, brand, Lighthouse.
 
 ---
 
-## Puesta en marcha
+## Getting started
 
 ```bash
 npm install
-cp .env.example .env          # Hoy: datos del proyecto Supabase; desde K0: los de staging
+cp .env.example .env          # Today: the Supabase project's values; from K0 on: staging's
 ```
 
-1. **Solo la primera vez por proyecto de Supabase:** ejecutar [`prisma/platform/supabase-bootstrap.sql`](./prisma/platform/supabase-bootstrap.sql) como `postgres` (MCP de Supabase o editor SQL). Crea los *helpers* que la migración necesita y que el rol `prisma` no puede crear (decisión 027).
-2. Aplicar las migraciones y generar el cliente:
+1. **Only the first time for each Supabase project:** run [`prisma/platform/supabase-bootstrap.sql`](./prisma/platform/supabase-bootstrap.sql) as `postgres` (Supabase MCP or SQL editor). It creates the helpers the migration needs and that the `prisma` role cannot create (decision 027).
+2. Apply the migrations and generate the client:
 
    ```bash
-   npx prisma migrate deploy  # Hoy el único proyecto es producción (decisión 068): nunca migrate dev contra él
+   npx prisma migrate deploy  # Today the only project is production (decision 068): never run migrate dev against it
    ```
 
-3. Datos de ejemplo (**solo dev/staging**; el seed se niega con cualquier otro proyecto):
+3. Sample data (**dev/staging only**; the seed refuses any other project):
 
    ```bash
-   SEED_DEV_PROJECT_REF=<ref> SEED_OWNER_USER_ID=<tu-id> npx prisma db seed
+   SEED_DEV_PROJECT_REF=<ref> SEED_OWNER_USER_ID=<your-id> npx prisma db seed
    npm run dev                                    # http://localhost:3000
    ```
 
 4. Tests:
 
    ```bash
-   npm run test:db                                # crea y migra la BD de tests
-   npm test                                       # unit + integración
+   npm run test:db                                # creates and migrates the test DB
+   npm test                                       # unit + integration
    ```
 
-| Variable | De dónde sale (panel de Supabase → botón **Connect**) | Uso |
+| Variable | Where it comes from (Supabase dashboard → **Connect** button) | Used for |
 |---|---|---|
-| `DATABASE_URL` | Transaction pooler, puerto **6543**, añadiendo `?pgbouncer=true` | Prisma Client en la app |
-| `DIRECT_URL` | Session pooler, puerto **5432** (o conexión directa con IPv6) | Prisma CLI: migraciones y Studio |
-| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto | Auth y Realtime en el cliente |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave publicable (`sb_publishable_…`) | Auth y Realtime en el cliente |
-| `APP_TIMEZONE` | — (por defecto `Europe/Madrid`; desde K1, zona por defecto de las familias nuevas) | Cálculo de "hoy" |
-| `DATABASE_CA_CERT` | Database → Settings → SSL configuration (PEM) | Verificación TLS; obligatorio en producción |
+| `DATABASE_URL` | Transaction pooler, port **6543**, adding `?pgbouncer=true` | Prisma Client in the app |
+| `DIRECT_URL` | Session pooler, port **5432** (or the direct connection over IPv6) | Prisma CLI: migrations and Studio |
+| `NEXT_PUBLIC_SUPABASE_URL` | Project URL | Auth and Realtime in the browser |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key (`sb_publishable_…`) | Auth and Realtime in the browser |
+| `APP_TIMEZONE` | — (defaults to `Europe/Madrid`; from K2 on, the default for new families) | Computing "today" |
+| `DATABASE_CA_CERT` | Database → Settings → SSL configuration (PEM) | Full TLS verification; required in production |
 
-| Script | Uso |
+| Script | Purpose |
 |---|---|
-| `npm run dev` | Servidor de desarrollo |
-| `npm run build` / `npm start` | Build y servidor de producción |
+| `npm run dev` | Development server |
+| `npm run build` / `npm start` | Production build and server |
 | `npm run typecheck` | `next typegen` + `tsc --noEmit` |
 | `npm run lint` / `npm run format` | ESLint / Prettier |
-| `npm test` | Vitest: unit + integración |
-| `npm run test:unit` / `npm run test:int` | Solo unit (sin red) / solo integración |
-| `npm run test:db` | Crea y migra la base de datos de test |
+| `npm test` | Vitest: unit + integration |
+| `npm run test:unit` / `npm run test:int` | Unit only (no network) / integration only |
+| `npm run test:db` | Creates and migrates the test database |
 
 ---
 
-## Contribuir
+## Contributing
 
-1. Lee [`CLAUDE.md`](./CLAUDE.md) (arquitectura, convenciones, diseño y seguridad) y la fase en curso de [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md).
-2. Trabaja en una rama corta (`feat/…`, `fix/…`, `docs/…`, `db/…`), nunca en `main`, que despliega producción.
-3. Commits en Conventional Commits, en inglés. Una migración por PR, siempre *expand → migrate → contract*.
-4. Los agentes de código (Claude, Cursor y otros) siguen las mismas reglas: [`AGENTS.md`](./AGENTS.md) y [`.cursor/rules/`](./.cursor/rules/) apuntan a `CLAUDE.md`.
+1. Read [`CLAUDE.md`](./CLAUDE.md) (architecture, conventions, design and security) and the current phase of [`PLAN_ESCALABILIDAD_KIDOO.md`](./PLAN_ESCALABILIDAD_KIDOO.md). Both are in Spanish, the project's working language.
+2. Work on a short-lived branch (`feat/…`, `fix/…`, `docs/…`, `db/…`), never on `main`, which deploys to production.
+3. Commits follow Conventional Commits, in English. One migration per PR, always *expand → migrate → contract*.
+4. If you change the README, update its Spanish version (`README.es.md`) in the same commit.
+5. Coding agents (Claude, Cursor and others) follow the same rules: [`AGENTS.md`](./AGENTS.md) and [`.cursor/rules/`](./.cursor/rules/) point to `CLAUDE.md`.

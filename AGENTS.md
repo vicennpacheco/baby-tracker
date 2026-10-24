@@ -23,11 +23,11 @@ Antes de proponer o escribir código:
 Lo imprescindible:
 
 - **Server Components por defecto.** Escrituras solo por Server Actions con `requireMember()` + Zod + `ActionResult`. Lecturas en `features/<m>/queries.ts` (`server-only`).
-- **Aislamiento por familia** en cada query y action; RLS en todas las tablas (aplicada también al servidor desde K1 con `withTenant`).
+- **Aislamiento por familia** en cada query y action; RLS en todas las tablas (aplicada también al servidor desde K2 con `withTenant`).
 - **Prisma 7** (cliente desde `@/generated/prisma/client`). El esquema solo cambia con Prisma Migrate, con *expand → migrate → contract*. Nunca `db push` ni DDL suelto.
 - **Realtime** solo como señal `{table, op}` por el canal privado de la familia, nunca con datos.
 - **IA** (desde K6): Gemini en Vertex AI UE, con consentimiento de la familia, herramientas de solo lectura y confirmación humana. El modelo nunca escribe.
 - **TypeScript estricto:** sin `any`, `!` ni `@ts-ignore`. Fechas en UTC y días en la zona de la familia. Medidas como enteros con unidad.
 - **UI:** mobile-first, objetivos de 48 px, pantallas en lugar de modales, modo oscuro, WCAG AA, tokens CSS y nada de colores literales.
 - **Git:** nunca en `main` (despliega producción). Ramas cortas y Conventional Commits en inglés. Secretos, ids de infraestructura y hosts de producción, jamás en el repositorio.
-- **Cierre:** `npm run typecheck`, `npm run lint` y `npm test` en verde, y plan y README actualizados.
+- **Cierre:** `npm run typecheck`, `npm run lint` y `npm test` en verde, y el plan y los dos README (`README.md` en inglés y `README.es.md`) actualizados.

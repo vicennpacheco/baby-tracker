@@ -2,7 +2,7 @@
 
 > **Estado:** propuesta del 2026-10-24, **pendiente de aprobación**. No se escribe código funcional hasta aprobarla.
 > **Autoría:** revisión de arquitectura (Staff) y de producto sobre el MVP desplegado (`main` en `cff4e4d`, Fase 4 cerrada el 2026-10-12).
-> **Decisiones asociadas:** 073–084 en [`docs/architecture/decisions.md`](./docs/architecture/decisions.md), todas en estado «Propuesta».
+> **Decisiones asociadas:** 073–085 en [`docs/architecture/decisions.md`](./docs/architecture/decisions.md), todas en estado «Propuesta».
 
 ---
 
@@ -11,11 +11,11 @@
 El MVP ya tiene la base correcta de un SaaS: datos acotados por familia (`household_id`), RLS en todas las tablas, idempotencia por UUID, concurrencia resuelta en PostgreSQL y sincronización privada por familia. Kidoo no exige reescribirlo. Exige **cuatro cambios de fondo** y **construir encima** en un orden estricto:
 
 1. **Entornos y CI/CD antes que nada** (fase K0). Hoy la única base de datos es la de producción y los tests de integración corren en su misma instancia (decisión 068). Ningún cambio de esquema de Kidoo debería tocar producción sin pasar por staging y CI.
-2. **Multi-tenant de verdad** (K1): un usuario en varias familias, roles y, sobre todo, **RLS aplicada también a las consultas del servidor**. Hoy Prisma se salta RLS y toda la protección depende de no olvidar un filtro en el código.
-3. **i18n antes de crecer la UI** (K2). Cada pantalla nueva escrita en español duro sería trabajo doble.
+2. **i18n antes de crecer la UI** (K1). Cada pantalla nueva escrita en español duro sería trabajo doble, y el multidioma es además la mejora más visible para el portfolio. Decidido el 2026-10-24: va justo después de K0, con español e inglés.
+3. **Multi-tenant de verdad** (K2): un usuario en varias familias, roles y, sobre todo, **RLS aplicada también a las consultas del servidor**. Hoy Prisma se salta RLS y toda la protección depende de no olvidar un filtro en el código. Sus pantallas nuevas (roles, selector de familia) ya nacen traducidas.
 4. **IA con privacidad por diseño** (K6–K7). Son datos de salud de menores: Gemini **a través de Vertex AI en la UE**, con consentimiento explícito, sin entrenamiento y con confirmación humana antes de escribir nada.
 
-Orden recomendado: **K0** Fundaciones → **K1** Multi-tenant → **K2** i18n → **K3** Chat → **K4** Percentiles OMS → **K5** Informe PDF → **K6** Asistente IA (texto) → **K7** Voz → **K8** Predicción de sueño → **K9** Monetización y lanzamiento.
+Orden recomendado: **K0** Fundaciones → **K1** i18n → **K2** Multi-tenant → **K3** Chat → **K4** Percentiles OMS → **K5** Informe PDF → **K6** Asistente IA (texto) → **K7** Voz → **K8** Predicción de sueño → **K9** Monetización y lanzamiento.
 
 **Antes de empezar necesito que decidas cinco cosas** (§15). La más urgente es el **nombre**: «Kidoo» choca con marcas y apps del mismo sector, así que lo trato como nombre en clave hasta verificarlo.
 
@@ -43,15 +43,15 @@ Orden recomendado: **K0** Fundaciones → **K1** Multi-tenant → **K2** i18n �
 | R1 | **Un solo proyecto Supabase, y es producción.** No hay dónde probar una migración. | Cualquier migración de Kidoo se probaría sobre datos reales de menores. | K0 (staging) |
 | R2 | **`baby_tracker_test` vive en la instancia de producción** (decisión 068), protegido por una guarda de nombre. | Un error en la guarda vaciaría producción (`TRUNCATE … CASCADE`). | K0 (tests en CI y staging) |
 | R3 | **Sin CI.** Typecheck, lint y tests solo corren en local; `main` despliega producción directamente en Vercel. | Un commit roto llega a producción. | K0 |
-| R4 | **Prisma se salta RLS** (rol `prisma` con `BYPASSRLS`). | La seguridad depende de que ningún desarrollador olvide un `where`. Aceptable con 2 usuarios; no con miles de familias. | K1 (decisión 078) |
-| R5 | **Un usuario = una familia** (`household_members.user_id` único, decisión 031) y máximo 2 miembros. | Excluye a padres separados, abuelos y cuidadores. | K1 (decisión 077) |
-| R6 | **Zona horaria global** (`APP_TIMEZONE`). | Una familia fuera de España vería mal «hoy». | K1 |
-| R7 | **Textos de UI en español dentro del código.** | Traducir después de seguir creciendo cuesta el doble. | K2 |
+| R4 | **Prisma se salta RLS** (rol `prisma` con `BYPASSRLS`). | La seguridad depende de que ningún desarrollador olvide un `where`. Aceptable con 2 usuarios; no con miles de familias. | K2 (decisión 078) |
+| R5 | **Un usuario = una familia** (`household_members.user_id` único, decisión 031) y máximo 2 miembros. | Excluye a padres separados, abuelos y cuidadores. | K2 (decisión 077) |
+| R6 | **Zona horaria global** (`APP_TIMEZONE`). | Una familia fuera de España vería mal «hoy». | K2 |
+| R7 | **Textos de UI en español dentro del código.** | Traducir después de seguir creciendo cuesta el doble. | K1 |
 | R8 | **Ramas y *worktrees* obsoletos:** `claude/determined-merkle-a87617` (3 commits sin integrar), `claude/laughing-keller-bb5a50` (2) y `worktree-chore-gitignore-commit-authorship` (1), todos del 2026-10-09 y 32–72 commits por detrás. | Ruido y riesgo de integrar trabajo ya sustituido (decisiones renumeradas). | K0 (revisar y archivar) |
 | R9 | **Sin observabilidad de errores en producción** (por la regla de «ningún tercero», §5). | En un SaaS no sabríamos que algo falla hasta que un usuario lo cuente. | K0 (decisión pendiente, §15) |
 | R10 | **Planes gratuitos o personales.** Vercel Hobby **no admite uso comercial**. Supabase Free pausa proyectos inactivos y no incluye copias PITR. | Un SaaS de pago no puede operar así. | K9 (antes de cobrar), K0 para staging |
-| R11 | `babies` no tiene `updated_by_id` y el otro móvil no recibe señal al eliminar la familia. | Limitaciones aceptadas en la 071. | K1 |
-| R12 | Lighthouse e iconos definitivos pendientes. | Calidad percibida. | K2 (marca) / K9 |
+| R11 | `babies` no tiene `updated_by_id` y el otro móvil no recibe señal al eliminar la familia. | Limitaciones aceptadas en la 071. | K2 |
+| R12 | Lighthouse e iconos definitivos pendientes. | Calidad percibida. | K1 (marca) / K9 |
 
 ---
 
@@ -71,7 +71,7 @@ Orden recomendado: **K0** Fundaciones → **K1** Multi-tenant → **K2** i18n �
 5. Etiquetas semánticas: `v1.0.0-mvp` sobre `cff4e4d` (estado del MVP, punto de restauración) y después `v1.x` por fase de Kidoo cerrada.
 6. *Feature flags* en dos niveles:
    - por entorno, con variables validadas en `env.ts` (`FEATURE_CHAT`, `FEATURE_AI`…);
-   - por familia, con `household_feature_overrides` para *beta testers* (K1).
+   - por familia, con `household_feature_overrides` para *beta testers* (K2).
 
 ### 2.2 Limpieza (K0, con tu confirmación)
 
@@ -220,7 +220,7 @@ Alternativa más estricta, si la prefieres: desactivar el despliegue automático
 | `CAREGIVER` | ✓ | solo los suyos | — | — | — | ✓ | — |
 | `VIEWER` | — | — | — | — | — | ✓ | — |
 
-- La matriz vive en `features/household/permissions.ts` (pura y testeada) **y** en las políticas RLS (§11.2).
+- La matriz vive en `features/household/permissions.ts` (pura y testeada) **y** en las políticas RLS (§11.3).
 - La invitación elige el rol al generarse.
 - El límite de miembros pasa a depender del plan (K9).
 
@@ -231,7 +231,7 @@ Alternativa más estricta, si la prefieres: desactivar el despliegue automático
 **Solución** (patrón documentado por Prisma para RLS con *client extensions*, adaptado al pooler en modo transacción):
 
 ```ts
-// src/lib/tenant-db.ts — boceto, NO se implementa hasta aprobar (K1)
+// src/lib/tenant-db.ts — boceto, NO se implementa hasta aprobar (K2)
 export async function withTenant<T>(
   member: { userId: string },
   fn: (tx: TenantTx) => Promise<T>,
@@ -253,7 +253,7 @@ export async function withTenant<T>(
   - eliminación de cuenta;
   - trabajos programados;
   - `insertOnce` cuando tenga que distinguir «id ajeno» de «reintento» (decisión 050).
-- **Coste:** dos sentencias extra por transacción, en el mismo viaje a la base de datos si se agrupan. Se mide en K1 con `EXPLAIN ANALYZE` y la latencia p95 de «Hoy». Objetivo: menos de 10 ms extra.
+- **Coste:** dos sentencias extra por transacción, en el mismo viaje a la base de datos si se agrupan. Se mide en K2 con `EXPLAIN ANALYZE` y la latencia p95 de «Hoy». Objetivo: menos de 10 ms extra.
 - **La autorización en código se mantiene** (`requireMember`, `assertBabyInHousehold`): la BD es la red de seguridad, no el único control, y los mensajes de error (`NOT_FOUND`, `CONFLICT`) siguen saliendo del código.
 
 ### 6.5 Pooling de conexiones
@@ -263,7 +263,7 @@ export async function withTenant<T>(
 - **Sin sentencias preparadas con nombre** (`?pgbouncer=true`), compatibles con el modo transacción.
 - Lecturas pesadas (informes, predicción por lotes): fuera del camino interactivo y en horas valle (K5 y K8).
 
-### 6.6 Pruebas de aislamiento entre familias (obligatorias en K1)
+### 6.6 Pruebas de aislamiento entre familias (obligatorias en K2)
 
 Suite de integración en CI que, para **cada tabla** × **cada operación** × **cada rol** × {misma familia, otra familia}, ejecuta la consulta **solo con RLS**, saltándose las comprobaciones del código, y verifica el resultado esperado. Cada política recibe su prueba de mutación (§3.5 de `CLAUDE.md`).
 
@@ -282,7 +282,7 @@ Suite de integración en CI que, para **cada tabla** × **cada operación** × *
 - **Mensajes:** `messages/<locale>/<feature>.json` con claves en inglés (`feeding.actions.save`). En el servidor, `getTranslations`; en las islas cliente, `useTranslations`, enviando solo el espacio de nombres de la isla.
 - **Fechas:** `src/lib/dates.ts` recibe el *locale* de date-fns activo (`es`, `enUS`…) además de la zona de la familia. El formato de 24 h o 12 h sigue al *locale*.
 - **Unidades:** `profiles.measurement_system` (`METRIC` · `IMPERIAL`). La conversión (lb/oz, in, fl oz) solo ocurre en la presentación y en los esquemas de entrada; la BD sigue en g, mm y ml.
-- **Zona horaria por familia:** `households.time_zone` (IANA, validada con `Intl.supportedValuesOf('timeZone')`). Los esquemas paramétricos de la decisión 049 ya la reciben.
+- **Zona horaria por familia** (llega en K2, con el multi-tenant): `households.time_zone` (IANA, validada con `Intl.supportedValuesOf('timeZone')`). Los esquemas paramétricos de la decisión 049 ya la reciben.
 - **Textos de Zod:** mapa de errores por idioma (`z.config({ customError })` o mensajes por clave), sin duplicar esquemas.
 - **Idiomas al lanzar:** `es` y `en`. Después, según mercado (pt-BR, fr, de). Traducción profesional con revisión médica de la terminología.
 
@@ -361,7 +361,7 @@ Los datos del bebé son **estructurados**: buscarlos por similitud vectorial ser
 - **RAG con `pgvector`** solo donde aporta:
   1. **corpus curado de guías** (fuentes públicas con licencia compatible, versionado, revisado por un profesional), para respuestas generales con cita;
   2. **(opcional, más adelante)** notas libres y chat de la familia, solo con consentimiento específico.
-- Embeddings multilingües de Vertex, `vector(768)` e índice HNSW (§11.6).
+- Embeddings multilingües de Vertex, `vector(768)` e índice HNSW (§11.7).
 
 ### 9.3 Registro por lenguaje natural: salida estructurada
 
@@ -441,7 +441,7 @@ Los datos del bebé son **estructurados**: buscarlos por similitud vectorial ser
 - **Generación:**
   - Route Handler de exportación (`/api/reports/[id]`, permitido por la regla 2.2);
   - `@react-pdf/renderer` (dependencia nueva: PDF en el servidor sin navegador *headless*, viable en funciones de Vercel). Se verifica su compatibilidad con React 19 en la instalación;
-  - plantillas traducidas (K2) y gráficas SVG de K4 reutilizadas.
+  - plantillas traducidas (K1) y gráficas SVG de K4 reutilizadas.
 - **Almacenamiento y entrega:**
   - bucket **privado** `reports` en Supabase Storage (creado en el *bootstrap*, porque `prisma` no gestiona `storage`);
   - `report_exports` guarda estado, rango y ruta;
@@ -484,18 +484,41 @@ Los datos del bebé son **estructurados**: buscarlos por similitud vectorial ser
 
 > **Borradores para revisar, no para ejecutar.** Cada migración real se genera con `prisma migrate dev --create-only` contra la BD de **staging o desarrollo** a partir de los cambios en `schema.prisma`, y se le añade a mano el SQL que Prisma no modela (RLS, políticas, *grants*, *triggers*), igual que hasta ahora (§2.6). Lo que exige privilegios de `postgres` va al *bootstrap* (decisión 027). Nombres en `snake_case`; una migración por PR (§2.1).
 
-### 11.1 K1-a · `multi_household_membership` (expand)
+### 11.1 K1 · `user_profiles`
+
+Primera migración de Kidoo: pequeña, solo añade (*expand*) y sirve para estrenar el circuito staging → producción de K0.
+
+```sql
+-- Generado por Prisma a partir de schema.prisma ──────────────────────────────
+CREATE TYPE "MeasurementSystem" AS ENUM ('METRIC', 'IMPERIAL');
+CREATE TABLE "profiles" (
+  "user_id"            UUID PRIMARY KEY,                          -- auth.users.id, sin FK (031)
+  "locale"             TEXT NOT NULL DEFAULT 'es',
+  "measurement_system" "MeasurementSystem" NOT NULL DEFAULT 'METRIC',
+  "created_at"         TIMESTAMPTZ(3) NOT NULL DEFAULT now(),
+  "updated_at"         TIMESTAMPTZ(3) NOT NULL
+);
+
+-- Añadido a mano ──────────────────────────────────────────────────────────────
+ALTER TABLE "profiles" ADD CONSTRAINT "profiles_locale_supported"
+  CHECK ("locale" IN ('es', 'en'));                               -- se amplía con cada idioma
+ALTER TABLE "profiles" ENABLE ROW LEVEL SECURITY;
+-- Sin políticas ni grants: hasta K2 solo lo usa el servidor (rol prisma), como households.
+-- En K2 recibe la política "self" de app_tenant (§11.3).
+```
+
+Hasta que exista la fila del perfil, el idioma sale de la cookie y de `Accept-Language`; la fila se crea (*upsert*) la primera vez que el usuario cambia el idioma o las unidades.
+
+### 11.2 K2-a · `multi_household_membership` (expand)
 
 ```sql
 -- Generado por Prisma a partir de schema.prisma ──────────────────────────────
 ALTER TYPE "HouseholdRole" ADD VALUE 'CAREGIVER';
 ALTER TYPE "HouseholdRole" ADD VALUE 'VIEWER';
-CREATE TYPE "MeasurementSystem" AS ENUM ('METRIC', 'IMPERIAL');
-
 DROP INDEX "household_members_user_id_key";                       -- deja de ser 1 familia por usuario (031)
 CREATE UNIQUE INDEX "household_members_household_id_user_id_key"
   ON "household_members" ("household_id", "user_id");
-CREATE INDEX "household_members_user_id_household_id_idx"         -- lo usan las funciones de RLS (§11.2)
+CREATE INDEX "household_members_user_id_household_id_idx"         -- lo usan las funciones de RLS (§11.3)
   ON "household_members" ("user_id", "household_id");
 
 ALTER TABLE "households"
@@ -506,14 +529,6 @@ ALTER TABLE "household_invites"
 ALTER TABLE "babies"
   ADD COLUMN "gestational_age_weeks" SMALLINT,                    -- edad corregida (K4)
   ADD COLUMN "updated_by_id" UUID;                                -- autoría de ediciones (R11)
-
-CREATE TABLE "profiles" (
-  "user_id"            UUID PRIMARY KEY,                          -- auth.users.id, sin FK (031)
-  "locale"             TEXT NOT NULL DEFAULT 'es',
-  "measurement_system" "MeasurementSystem" NOT NULL DEFAULT 'METRIC',
-  "created_at"         TIMESTAMPTZ(3) NOT NULL DEFAULT now(),
-  "updated_at"         TIMESTAMPTZ(3) NOT NULL
-);
 
 CREATE TABLE "household_feature_overrides" (                      -- flags beta por familia (§2.1)
   "household_id" UUID NOT NULL REFERENCES "households"("id") ON DELETE CASCADE,
@@ -527,9 +542,6 @@ CREATE TABLE "household_feature_overrides" (                      -- flags beta 
 -- Añadido a mano ──────────────────────────────────────────────────────────────
 ALTER TABLE "babies" ADD CONSTRAINT "babies_gestational_age_plausible"
   CHECK ("gestational_age_weeks" IS NULL OR "gestational_age_weeks" BETWEEN 22 AND 44);
-ALTER TABLE "profiles" ADD CONSTRAINT "profiles_locale_supported"
-  CHECK ("locale" IN ('es', 'en'));                               -- se amplía con cada idioma
-ALTER TABLE "profiles" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "household_feature_overrides" ENABLE ROW LEVEL SECURITY;
 -- La zona horaria se valida en Zod contra Intl.supportedValuesOf('timeZone'): un CHECK
 -- que consulte pg_timezone_names no sería inmutable.
@@ -537,7 +549,7 @@ ALTER TABLE "household_feature_overrides" ENABLE ROW LEVEL SECURITY;
 
 **Compatibilidad:** el código del MVP sigue funcionando mientras nadie tenga dos familias. La UI para unirse a una segunda familia se activa con un *flag* después de desplegar el código nuevo (*expand → migrate*).
 
-### 11.2 K1-b · `tenant_rls_enforcement`
+### 11.3 K2-b · `tenant_rls_enforcement`
 
 **Bootstrap** (como `postgres`, una vez por proyecto; se añade a `supabase-bootstrap.sql` §6 y a `shadow-stubs.sql`):
 
@@ -657,7 +669,7 @@ CREATE POLICY "tenant_select" ON "household_feature_overrides" FOR SELECT TO app
 - `get_advisors` sin avisos nuevos (los avisos sobre `SECURITY DEFINER` en `private` quedan documentados como esperados);
 - suite de aislamiento (§6.6) en verde.
 
-### 11.3 K3 · `household_chat`
+### 11.4 K3 · `household_chat`
 
 **Bootstrap** (`postgres`, porque `realtime.send` lo exige; §4b nuevo):
 
@@ -726,7 +738,7 @@ CREATE TRIGGER "broadcast_household_change"
 -- Sin GRANT a authenticated ni publicación en supabase_realtime (decisión 066).
 ```
 
-### 11.4 K4 · `growth_reference_lms`
+### 11.5 K4 · `growth_reference_lms`
 
 ```sql
 -- Generado por Prisma ─────────────────────────────────────────────────────────
@@ -751,7 +763,7 @@ CREATE POLICY "reference_read" ON "growth_reference_lms" FOR SELECT TO app_tenan
 -- Datos: scripts/load-growth-reference.ts (upsert idempotente con checksum), tras cada migrate deploy.
 ```
 
-### 11.5 K5 · `report_exports`
+### 11.6 K5 · `report_exports`
 
 **Bootstrap** (`postgres`; bucket privado, sin políticas para `authenticated`, de modo que solo el servidor lo usa):
 
@@ -796,11 +808,11 @@ ALTER TABLE "report_exports" ADD CONSTRAINT "report_exports_range_valid"
   CHECK ("range_end" >= "range_start" AND "range_end" - "range_start" <= 366);
 ALTER TABLE "report_exports" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "report_share_links" ENABLE ROW LEVEL SECURITY;
--- Políticas tenant_* con el patrón de §11.2 sobre baby_id (report_exports) y sobre el informe
+-- Políticas tenant_* con el patrón de §11.3 sobre baby_id (report_exports) y sobre el informe
 -- (report_share_links). /r/<token> resuelve el token con systemDb (lista cerrada) y nunca expone el id.
 ```
 
-### 11.6 K6 · `ai_assistant`
+### 11.7 K6 · `ai_assistant`
 
 **Bootstrap:** `create extension if not exists vector with schema extensions;`
 
@@ -874,7 +886,7 @@ CREATE POLICY "reference_read" ON "knowledge_documents" FOR SELECT TO app_tenant
 CREATE POLICY "reference_read" ON "knowledge_chunks" FOR SELECT TO app_tenant USING (true);
 ```
 
-### 11.7 K8 · `sleep_predictions` (solo la V2)
+### 11.8 K8 · `sleep_predictions` (solo la V2)
 
 ```sql
 CREATE TABLE "sleep_predictions" (
@@ -892,7 +904,7 @@ ALTER TABLE "sleep_predictions" ADD CONSTRAINT "sleep_predictions_window_valid"
 ALTER TABLE "sleep_predictions" ENABLE ROW LEVEL SECURITY;   -- + tenant_select; escritura solo del trabajo por lotes
 ```
 
-### 11.8 K9 · `billing`
+### 11.9 K9 · `billing`
 
 ```sql
 CREATE TYPE "PlanTier" AS ENUM ('FREE', 'PLUS', 'FAMILY');
@@ -926,7 +938,7 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 
 ### K0 · Fundaciones: entornos, CI/CD y limpieza (M)
 
-1. Aprobar este plan y las decisiones 073–084 (o ajustarlas).
+1. Aprobar este plan y las decisiones 073–084 (o ajustarlas). La 085 ya está aprobada.
 2. Etiqueta `v1.0.0-mvp` sobre `cff4e4d`; revisar y archivar las 3 ramas y *worktrees* obsoletos (R8).
 3. Proteger `main` en GitHub (PR obligatoria y CI obligatoria).
 4. Crear `kidoo-staging` (paso manual, §3.5): *bootstrap*, `migrate deploy`, seed sintético y `kidoo_test`.
@@ -941,10 +953,27 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 - una migración vacía recorre staging → aprobación → producción con `verify-db` en verde;
 - ningún test toca la instancia de producción.
 
-### K1 · Multi-tenant (L)
+### K1 · Internacionalización y marca (M)
 
-1. Migración 11.1 (*expand*) y `schema.prisma`.
-2. `withTenant`, `systemDb` y la regla de ESLint de la lista cerrada; migración 11.2 y cambios en el *bootstrap* y los *stubs*.
+1. Instalar `next-intl` (verificando versiones) y configurarlo sin prefijo de idioma; `<html lang>` dinámico.
+2. Migración 11.1 (`profiles`): idioma y unidades del usuario, más la cookie y la detección por `Accept-Language`; selector de idioma en Ajustes y en el login.
+3. Extraer los textos por módulo a `messages/es/*.json` y traducir a `en`, con test de claves completas y regla ESLint anti-literales. Traducción revisada por una persona nativa, con especial cuidado en la terminología médica.
+4. Errores de Zod y de las actions traducidos en el servidor con el idioma de la petición.
+5. `dates.ts` con *locale* (formato de 24 o 12 h); unidades imperiales en presentación y entrada.
+6. **Pseudo-idioma de desarrollo** (`xx`, generado por un script: textos un 40 % más largos y con acentos) para detectar textos sin traducir y diseños que se rompen a 375 px.
+7. Nombre de la app como mensaje; manifiesto por idioma; iconos definitivos (R12) si la marca está decidida.
+8. Portfolio: capturas de la app en `es` y `en` (claro y oscuro) en los dos README.
+
+**Salida:**
+- la app completa en `en` sin un solo texto en español, y en `xx` sin desbordes a 375 px;
+- tests y build en verde;
+- revisión de accesibilidad en ambos idiomas;
+- primera migración de Kidoo aplicada por el circuito staging → producción de K0.
+
+### K2 · Multi-tenant (L)
+
+1. Migración 11.2 (*expand*) y `schema.prisma`. Los textos nuevos (roles, selector de familia, invitaciones) nacen en los catálogos de K1, en los dos idiomas.
+2. `withTenant`, `systemDb` y la regla de ESLint de la lista cerrada; migración 11.3 y cambios en el *bootstrap* y los *stubs*.
 3. Migrar queries y actions módulo a módulo a `withTenant`, con PR por módulo.
 4. Suite de aislamiento (§6.6) con pruebas de mutación de las políticas.
 5. Roles en invitaciones y en la UI de Ajustes; familia activa (cookie) y selector; `requireMember()` con rol.
@@ -957,19 +986,9 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 - p95 de «Hoy» con un aumento de menos de 10 ms;
 - un usuario en dos familias, y un VIEWER que no puede escribir ni por la UI ni por la BD.
 
-### K2 · Internacionalización y marca (M)
-
-1. Instalar `next-intl` (verificando versiones) y configurarlo sin prefijo de idioma.
-2. `profiles.locale`, cookie y detección; selector de idioma en Ajustes.
-3. Extraer los textos por módulo a `messages/es/*.json`; traducir a `en`; test de claves completas y regla ESLint anti-literales.
-4. `dates.ts` con *locale*; unidades imperiales en presentación y entrada.
-5. Nombre de la app como mensaje; manifiesto por idioma; iconos definitivos (R12) si la marca está decidida.
-
-**Salida:** la app completa en `en` sin un solo texto en español; tests y build en verde; revisión de accesibilidad en ambos idiomas.
-
 ### K3 · Chat familiar (M)
 
-1. *Bootstrap* §4b y migración 11.3.
+1. *Bootstrap* §4b y migración 11.4.
 2. `features/chat`: esquemas, queries con cursor, actions idempotentes y `labels`.
 3. UI `/chat`: lista virtualizada, envío optimista, no leídos y estados sin conexión, vacío y error.
 4. *(K3b, opcional)* Web Push con aviso sin contenido.
@@ -979,7 +998,7 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 ### K4 · Curvas de percentiles OMS (M)
 
 1. **Confirmar la licencia** de los datos de la OMS para uso comercial.
-2. Migración 11.4 y `scripts/load-growth-reference.ts`.
+2. Migración 11.5 y `scripts/load-growth-reference.ts`.
 3. `percentiles.ts` (LMS y edad corregida) con tests frente a valores publicados.
 4. Gráfica SVG accesible y edad gestacional en el formulario del bebé.
 
@@ -987,7 +1006,7 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 
 ### K5 · Informe para el pediatra (M)
 
-1. *Bootstrap* (bucket) y migración 11.5.
+1. *Bootstrap* (bucket) y migración 11.6.
 2. Instalar `@react-pdf/renderer` (verificando la compatibilidad con React 19); plantilla traducida.
 3. Route Handler de exportación; enlace compartible `/r/<token>` con límite de intentos; exclusión en el proxy.
 4. Limpieza programada de informes caducados.
@@ -1002,7 +1021,7 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
    - región UE y modelo verificados;
    - textos de consentimiento revisados.
 2. Instalar `ai` y `@ai-sdk/google-vertex` (versiones verificadas); credenciales de servicio solo en el servidor.
-3. *Bootstrap* (`vector`) y migración 11.6; carga del corpus curado.
+3. *Bootstrap* (`vector`) y migración 11.7; carga del corpus curado.
 4. `features/assistant`: consentimiento, cuotas, herramientas de solo lectura con `withTenant`, salida estructurada validada con los esquemas existentes y tarjetas de confirmación.
 5. Conjunto de oro y pruebas adversariales (§9.6).
 6. *Flag* `FEATURE_AI` solo para familias beta.
@@ -1020,13 +1039,13 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 
 1. V1 heurística (`prediction.ts`) con tabla de ventanas por edad revisada y citada; tarjeta en «Hoy» y en «Sueño».
 2. Recogida de métricas de acierto en beta.
-3. *(V2)* Migración 11.7 y trabajo por lotes nocturno, solo si la V1 demuestra valor.
+3. *(V2)* Migración 11.8 y trabajo por lotes nocturno, solo si la V1 demuestra valor.
 
 **Salida:** error absoluto medio de la V1 medido en beta; textos sin lenguaje médico; revisión regulatoria hecha antes de la V2.
 
 ### K9 · Monetización y lanzamiento (L)
 
-1. Decisión del proveedor de pagos; migración 11.8; *webhook* (Route Handler idempotente); `entitlementsFor(tier)`; pantallas de plan.
+1. Decisión del proveedor de pagos; migración 11.9; *webhook* (Route Handler idempotente); `entitlementsFor(tier)`; pantallas de plan.
 2. Pasar a planes comerciales: Vercel Pro, Supabase Pro con copias PITR y región UE.
 3. Legal: política de privacidad, términos, subencargados, aviso de IA, exportación y eliminación de cuenta (§13).
 4. **Marca registrada o nombre definitivo**; renombrar repo, proyecto de Vercel, proyectos de Supabase y paquete.
@@ -1038,7 +1057,7 @@ ALTER TABLE "billing_events" ENABLE ROW LEVEL SECURITY;    -- sin políticas: so
 
 | Fase | Paquete | Problema que resuelve | Por qué no basta lo que hay |
 |---|---|---|---|
-| K2 | `next-intl` | Mensajes ICU, carga por idioma en Server Components, formato | Next.js no trae i18n para App Router; hacerlo a mano es reimplementar ICU |
+| K1 | `next-intl` | Mensajes ICU, carga por idioma en Server Components, formato | Next.js no trae i18n para App Router; hacerlo a mano es reimplementar ICU |
 | K3b | `web-push` (o Edge Function) | Firma VAPID y cifrado de Web Push | La API del navegador solo suscribe; el envío exige criptografía en el servidor |
 | K5 | `@react-pdf/renderer` | PDF en el servidor sin navegador | Chromium *headless* no cabe bien en funciones *serverless* |
 | K6 | `ai`, `@ai-sdk/google-vertex` | Llamadas al modelo, herramientas, salida estructurada y *streaming* | Las APIs REST de Vertex a mano duplican lo que el SDK estandariza |
@@ -1059,7 +1078,7 @@ Las versiones se fijan y se verifican contra la documentación oficial al instal
 - **Subencargados** (Supabase, Vercel, Google Cloud y el proveedor de pagos): DPA firmados, región UE donde exista y lista pública de subencargados.
 - **Derechos:**
   - exportación de los datos de la familia en JSON y CSV (portabilidad);
-  - eliminación de cuenta, que hoy no existe y exige borrar el usuario de Supabase Auth: necesitará la clave secreta **solo en el servidor** (cambio de la regla 2.7, a decidir en K1 o K9);
+  - eliminación de cuenta, que hoy no existe y exige borrar el usuario de Supabase Auth: necesitará la clave secreta **solo en el servidor** (cambio de la regla 2.7, a decidir en K2 o K9);
   - eliminación de familia (ya existe, decisión 071).
 - **Minimización:** sin transcripciones de IA, sin audio, avisos push sin contenido y nada de datos de producción en staging.
 
@@ -1072,11 +1091,11 @@ Las versiones se fijan y se verifican contra la documentación oficial al instal
 
 | Riesgo | Prob. | Impacto | Mitigación |
 |---|---|---|---|
-| Conflicto de marca «Kidoo» | Alta | Alto | Búsqueda de marca antes de K2; «Kidoo» como nombre en clave (073) |
+| Conflicto de marca «Kidoo» | Alta | Alto | Búsqueda de marca antes de K1; «Kidoo» como nombre en clave (073) |
 | Fuga entre familias | Baja | Crítico | RLS aplicada al servidor (078) y suite de aislamiento con mutación (§6.6) |
 | Coste de IA descontrolado | Media | Medio | Cuotas en BD, modelo Flash y beta cerrada (§9.5) |
 | Alucinación que se registra | Media | Alto | Confirmación humana y validación Zod (081) |
-| `withTenant` degrada la latencia | Baja | Medio | Medir en K1; agrupar `set_config` y `SET ROLE`; índices |
+| `withTenant` degrada la latencia | Baja | Medio | Medir en K2; agrupar `set_config` y `SET ROLE`; índices |
 | Licencia OMS no comercial | Media | Medio | Verificar antes de K4; alternativa: referencias con licencia abierta o permiso |
 | Migración aplicada a producción con código incompatible | Media | Alto | *Expand → migrate → contract* y aprobación manual (076) |
 | Particiones de Realtime ausentes | Baja | Medio | `verify-db` en cada despliegue (066) |
@@ -1098,9 +1117,11 @@ Las versiones se fijan y se verifican contra la documentación oficial al instal
 
 ## 15. Decisiones que necesito de ti antes de K0
 
+**Ya decidido (2026-10-24):** multidioma justo después de K0 (fase K1, antes del multi-tenant), con español e inglés en la primera versión, y README bilingüe para el portfolio (`README.md` en inglés y `README.es.md` en español, decisión 085).
+
 | # | Decisión | Mi recomendación |
 |---|---|---|
-| D1 | **Nombre:** ¿«Kidoo» como nombre en clave hasta verificar la marca, o buscamos otro ya? | Nombre en clave; búsqueda de marca antes de K2 |
+| D1 | **Nombre:** ¿«Kidoo» como nombre en clave hasta verificar la marca, o buscamos otro ya? | Nombre en clave; búsqueda de marca antes de K1 |
 | D2 | **Staging:** ¿lo creas tú en el panel o me autorizas a crearlo vía MCP (con confirmación de coste)? | Créalo tú o autorízame tras ver el coste |
 | D3 | **Despliegue de producción:** ¿Vercel despliega `main` automáticamente (y aplicamos *expand/contract*) o promovemos desde GitHub tras migrar? | Automático + *expand/contract* (menos piezas) |
 | D4 | **Observabilidad:** ¿añadimos un servicio de errores con región UE (por ejemplo Sentry EU) o nos quedamos con Vercel Observability? Cambia la regla «ningún tercero» de §5. | Vercel Observability en K0; servicio externo con región UE antes de K9 |
