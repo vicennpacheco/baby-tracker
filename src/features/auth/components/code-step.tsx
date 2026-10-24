@@ -19,6 +19,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type CodeStepProps = {
@@ -39,7 +40,7 @@ export function CodeStep({ email, onChangeEmail }: CodeStepProps): ReactNode {
   function onSubmit(values: VerifyEmailOtpInput): void {
     startVerify(async () => {
       // On success the action redirects, so only failures come back.
-      const result = await verifyEmailOtp(values);
+      const result = await callAction(() => verifyEmailOtp(values));
       if (result.ok) return;
       const { message, fieldErrors } = result.error;
       if (!applyFieldErrors(form.setError, ["token"], fieldErrors)) {
@@ -50,7 +51,7 @@ export function CodeStep({ email, onChangeEmail }: CodeStepProps): ReactNode {
 
   function resendCode(): void {
     startResend(async () => {
-      const result = await requestEmailOtp({ email });
+      const result = await callAction(() => requestEmailOtp({ email }));
       if (result.ok) toast.success("Código enviado. Revisa tu email.");
       else toast.error(result.error.message);
     });

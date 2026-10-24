@@ -21,6 +21,7 @@ import {
   type CreateGrowthMeasurementInput,
   growthMeasurementSchemas,
 } from "@/features/growth/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type NewGrowthFormProps = {
@@ -52,7 +53,7 @@ export function NewGrowthForm({
 
   function onSubmit(values: CreateGrowthMeasurementInput): void {
     startTransition(async () => {
-      const result = await createGrowthMeasurement(values);
+      const result = await callAction(() => createGrowthMeasurement(values));
       if (result.ok) {
         offerUndo({
           message: "Medida guardada",

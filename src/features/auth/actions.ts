@@ -86,7 +86,9 @@ export async function verifyEmailOtp(input: unknown): Promise<ActionResult> {
   redirect("/");
 }
 
-export async function signOut(): Promise<void> {
+// Always redirects; typed like the other actions so clients can call it
+// through callAction, which turns a dropped connection into a toast.
+export async function signOut(): Promise<ActionResult> {
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signOut();
   if (error) handleActionError("signOut", error);

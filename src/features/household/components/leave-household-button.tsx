@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { leaveHousehold } from "@/features/household/actions";
+import { callAction } from "@/lib/call-action";
 import { useOnlineStatus } from "@/lib/use-online-status";
 
 /**
@@ -34,7 +35,7 @@ export function LeaveHouseholdButton({
 
   function leave(): void {
     startTransition(async () => {
-      const result = await leaveHousehold();
+      const result = await callAction(() => leaveHousehold());
       if (!result.ok) toast.error(result.error.message);
     });
   }

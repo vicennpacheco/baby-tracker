@@ -18,7 +18,7 @@ export type ActionError = {
 export type ActionResult<T = void> =
   { ok: true; data: T } | { ok: false; error: ActionError };
 
-const UNEXPECTED_MESSAGE = "Algo ha fallado. Inténtalo de nuevo.";
+export const UNEXPECTED_MESSAGE = "Algo ha fallado. Inténtalo de nuevo.";
 const NOT_FOUND_MESSAGE = "No hemos encontrado ese registro.";
 
 /**

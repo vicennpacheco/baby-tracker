@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type EmailStepProps = {
@@ -32,7 +33,7 @@ export function EmailStep({
 
   function onSubmit(values: RequestEmailOtpInput): void {
     startTransition(async () => {
-      const result = await requestEmailOtp(values);
+      const result = await callAction(() => requestEmailOtp(values));
       if (result.ok) {
         onCodeSent(values.email);
         return;

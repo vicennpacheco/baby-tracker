@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { deleteHousehold } from "@/features/household/actions";
 import { matchesBabyName } from "@/features/household/delete-confirmation";
+import { callAction } from "@/lib/call-action";
 import { useOnlineStatus } from "@/lib/use-online-status";
 
 type DeleteHouseholdDialogProps = {
@@ -55,7 +56,9 @@ export function DeleteHouseholdDialog({
 
   function erase(): void {
     startTransition(async () => {
-      const result = await deleteHousehold({ babyName: typed });
+      const result = await callAction(() =>
+        deleteHousehold({ babyName: typed }),
+      );
       if (result.ok) return;
       const fieldError = result.error.fieldErrors?.babyName?.[0];
       if (fieldError) setError(fieldError);

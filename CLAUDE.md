@@ -4,7 +4,7 @@
 
 > **Nidly** (nombre definitivo desde el 2026-10-24, decisión 087; sustituye al nombre en clave «Kidoo») es la evolución del MVP «Métricas Bebé» hacia un SaaS B2C multi-tenant. El MVP está **en producción**; la evolución se planifica en [`PLAN_ESCALABILIDAD_NIDLY.md`](./PLAN_ESCALABILIDAD_NIDLY.md) por fases **K0–K9**.
 >
-> **Vigencia de las reglas:** las reglas sin marca están **vigentes hoy**. Las marcadas **[Kx]** entran en vigor cuando la fase Kx esté aprobada y su primera tarea fusionada; hasta entonces manda el comportamiento actual. Las decisiones 073–088 están **aprobadas** desde el 2026-10-24 ; la fase en curso es **K0**.
+> **Vigencia de las reglas:** las reglas sin marca están **vigentes hoy**. Las marcadas **[Kx]** entran en vigor cuando la fase Kx esté aprobada y su primera tarea fusionada; hasta entonces manda el comportamiento actual. Las decisiones 073–089 están **aprobadas** desde el 2026-10-24; la fase en curso es **K0**.
 
 ---
 
@@ -173,6 +173,7 @@ export async function createDiaperChange(
 - **Acciones de un toque** (pañal mojado, iniciar cronómetro, enviar mensaje **[K3]**): botón que genera el UUID (`crypto.randomUUID()`) e invoca la action con `useTransition`, y `useOptimistic` cuando mejore la sensación de inmediatez.
 - **Cronómetros:** la fuente de verdad es `startedAt` en la BD (`endedAt = null` mientras está activo). El cliente solo pinta `now − startedAt` con un intervalo de 1 s. Nunca guardar el estado de un cronómetro solo en el cliente: debe sobrevivir al bloqueo del móvil, al cierre de la pestaña y, sobre todo, **verse y poder pararse desde el dispositivo de otro cuidador**.
 - **Estado:** sin librerías de estado global. Filtros (p. ej. el día seleccionado) en `searchParams`; estado de UI en local. La familia activa **[K2]** vive en una cookie validada por el servidor, nunca en estado del cliente.
+- **Llamadas a actions desde el cliente:** siempre `await callAction(() => action(input))` (`lib/call-action.ts`), nunca `await action(input)` directo: si la red cae, la llamada se rechaza y `error.tsx` sustituiría la pantalla; `callAction` lo convierte en un `ActionResult` `UNEXPECTED` («No hay conexión…») y vuelve a lanzar los `redirect()`. Tras un `UNEXPECTED` no se llama a `router.refresh()` (decisión 089).
 - **Feedback:** todo botón que dispara una action muestra estado pendiente y se deshabilita mientras tanto. Éxito → toast (`sonner`); error → mensaje junto al campo o toast; `UNAUTHENTICATED` → redirigir al login.
 
 ### 2.5 Fechas y zona horaria
@@ -562,6 +563,7 @@ export type ActionResult<T = void> =
 | `npx prisma migrate status` | Estado de las migraciones |
 | `npx prisma db seed` | Datos de ejemplo (**solo dev/staging**) |
 | `npx prisma studio` | Explorar la BD |
+| `node --env-file=.env.staging <comando>` | Cualquier comando contra **staging** (p. ej. `node --env-file=.env.staging node_modules/prisma/build/index.js migrate deploy`, `… --import tsx scripts/verify-db.ts`, `… node_modules/vitest/vitest.mjs run`): `.env.staging` se carga primero y `.env` nunca lo sobrescribe |
 | **[K0]** `npx tsx scripts/verify-db.ts` | Comprobaciones de la regla 0.2 contra un entorno |
 | **[K4]** `npm run reference:load` | Cargar o actualizar las tablas de referencia OMS |
 
@@ -569,7 +571,7 @@ export type ActionResult<T = void> =
 
 ## 7. Registro de decisiones
 
-El registro completo (decisiones vigentes **001–072** y propuestas **073–085**) vive en [`docs/architecture/decisions.md`](./docs/architecture/decisions.md). Se trasladó tal cual el 2026-10-24 para que este archivo siga siendo legible en cada sesión; el código lo cita por número («decisión 066»).
+El registro completo (decisiones vigentes **001–072** y de la evolución a SaaS **073–089**) vive en [`docs/architecture/decisions.md`](./docs/architecture/decisions.md). Se trasladó tal cual el 2026-10-24 para que este archivo siga siendo legible en cada sesión; el código lo cita por número («decisión 066»).
 
 - Añadir una fila por cada decisión de arquitectura nueva o modificada. **No borrar filas:** si una decisión cambia, se marca como sustituida y se añade otra.
 - Las decisiones en estado «Propuesta» no se aplican hasta que el usuario las apruebe; al aprobarlas, cambiar su estado y fecha.

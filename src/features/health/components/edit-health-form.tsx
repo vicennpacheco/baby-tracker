@@ -17,6 +17,7 @@ import {
   healthRecordSchemas,
   type UpdateHealthRecordInput,
 } from "@/features/health/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type EditHealthFormProps = {
@@ -46,7 +47,7 @@ export function EditHealthForm({
 
   function onSubmit(values: UpdateHealthRecordInput): void {
     startTransition(async () => {
-      const result = await updateHealthRecord(values);
+      const result = await callAction(() => updateHealthRecord(values));
       if (result.ok) {
         toast.success("Cambios guardados");
         router.replace("/health");

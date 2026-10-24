@@ -17,6 +17,7 @@ import {
   feedingSchemas,
   type UpdateFeedingInput,
 } from "@/features/feeding/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type EditFeedingFormProps = {
@@ -49,7 +50,7 @@ export function EditFeedingForm({
 
   function onSubmit(values: UpdateFeedingInput): void {
     startTransition(async () => {
-      const result = await updateFeeding(values);
+      const result = await callAction(() => updateFeeding(values));
       if (result.ok) {
         toast.success("Cambios guardados");
         router.replace(returnHref);

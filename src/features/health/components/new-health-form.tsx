@@ -26,6 +26,7 @@ import {
   healthRecordSchemas,
 } from "@/features/health/schemas";
 import type { HealthRecordKind } from "@/generated/prisma/enums";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type NewHealthFormProps = {
@@ -76,7 +77,7 @@ export function NewHealthForm({
 
   function onSubmit(values: CreateHealthRecordInput): void {
     startTransition(async () => {
-      const result = await createHealthRecord(values);
+      const result = await callAction(() => createHealthRecord(values));
       if (result.ok) {
         offerUndo({
           message:

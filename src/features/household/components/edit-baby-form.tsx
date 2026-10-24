@@ -14,6 +14,7 @@ import {
   updateBabySchema,
   type UpdateBabyInput,
 } from "@/features/household/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 const FIELDS = ["babyName", "babyBirthDate", "babySex"] as const;
@@ -38,7 +39,7 @@ export function EditBabyForm({
 
   function onSubmit(values: UpdateBabyInput): void {
     startTransition(async () => {
-      const result = await updateBaby(values);
+      const result = await callAction(() => updateBaby(values));
       if (result.ok) {
         toast.success("Cambios guardados");
         router.replace("/settings");

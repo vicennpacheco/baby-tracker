@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { revokeHouseholdInvite } from "@/features/household/actions";
+import { callAction } from "@/lib/call-action";
 import { useOnlineStatus } from "@/lib/use-online-status";
 
 /**
@@ -20,7 +21,7 @@ export function RevokeInviteButton(): ReactNode {
 
   function revoke(): void {
     startTransition(async () => {
-      const result = await revokeHouseholdInvite();
+      const result = await callAction(() => revokeHouseholdInvite());
       if (result.ok) {
         toast.success("Código anulado");
         router.refresh();

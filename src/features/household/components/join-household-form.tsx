@@ -13,6 +13,7 @@ import {
   joinHouseholdSchema,
   type JoinHouseholdInput,
 } from "@/features/household/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 const FIELDS = ["code", "displayName"] as const;
@@ -27,7 +28,7 @@ export function JoinHouseholdForm(): ReactNode {
   function onSubmit(values: JoinHouseholdInput): void {
     startTransition(async () => {
       // On success the action redirects home, so only failures come back.
-      const result = await joinHousehold(values);
+      const result = await callAction(() => joinHousehold(values));
       if (result.ok) return;
       const { message, fieldErrors } = result.error;
       if (!applyFieldErrors(form.setError, FIELDS, fieldErrors)) {

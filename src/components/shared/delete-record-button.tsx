@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/action-result";
+import { callAction } from "@/lib/call-action";
 import { useOnlineStatus } from "@/lib/use-online-status";
 
 type DeleteRecordButtonProps = {
@@ -53,7 +54,7 @@ export function DeleteRecordButton({
 
   function remove(): void {
     startTransition(async () => {
-      const result = await deleteAction({ id });
+      const result = await callAction(() => deleteAction({ id }));
       if (result.ok) {
         setIsOpen(false);
         toast.success(successMessage);

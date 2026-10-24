@@ -1,6 +1,5 @@
-# Secretos
-.env
-.env*.local
+# Secretos: every env file (.env, .env.staging, .env.local…) except the example
+.env*
 !.env.example
 
 # dependencies

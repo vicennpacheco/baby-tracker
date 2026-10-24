@@ -21,6 +21,7 @@ import {
   type CreateSleepSessionInput,
   sleepSessionSchemas,
 } from "@/features/sleep/schemas";
+import { callAction } from "@/lib/call-action";
 import { applyFieldErrors } from "@/lib/forms";
 
 type NewSleepFormProps = {
@@ -52,7 +53,7 @@ export function NewSleepForm({
 
   function onSubmit(values: CreateSleepSessionInput): void {
     startTransition(async () => {
-      const result = await createSleepSession(values);
+      const result = await callAction(() => createSleepSession(values));
       if (result.ok) {
         offerUndo({
           message: "Siesta guardada",
