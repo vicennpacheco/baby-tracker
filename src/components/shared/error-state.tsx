@@ -1,11 +1,14 @@
 "use client";
 
+import { captureException } from "@sentry/nextjs";
 import { CircleAlert, RotateCw } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 
 type ErrorStateProps = {
+  /** `error` from error.tsx: reported to error monitoring once. */
+  error: Error & { digest?: string };
   /** `retry` from error.tsx: re-fetches and re-renders the failed segment. */
   retry: () => void;
 };
@@ -14,7 +17,13 @@ type ErrorStateProps = {
  * Body of every error.tsx. Server details never reach the client (Next.js
  * only forwards a digest), so the copy stays generic and offers a way out.
  */
-export function ErrorState({ retry }: ErrorStateProps): ReactNode {
+export function ErrorState({ error, retry }: ErrorStateProps): ReactNode {
+  useEffect(() => {
+    // A server error arrives here with only its digest, and onRequestError
+    // already reported it on the server (src/instrumentation.ts).
+    if (error.digest === undefined) captureException(error);
+  }, [error]);
+
   return (
     <div className="flex flex-1 flex-col gap-6">
       <div role="alert" className="flex flex-col gap-2">
