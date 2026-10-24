@@ -1,30 +1,37 @@
 /**
- * Creates (if missing) and migrates the integration test database inside the
- * DEV Supabase project:
+ * Creates (if missing) and migrates the integration test database, either in
+ * the dev/staging Supabase project or in an ephemeral loopback Postgres (CI):
  *
  *   npm run test:db
  *
  * Safe to re-run: CREATE DATABASE only when absent; stubs and migrations are
- * idempotent. Refuses to run unless DIRECT_URL belongs to SEED_DEV_PROJECT_REF.
+ * idempotent. Refuses any remote database that is not SEED_DEV_PROJECT_REF's
+ * (assertSafeTestTarget).
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { Client } from "pg";
 
-import { assertDevProject, TEST_DATABASE, withDatabase } from "./database-url";
+import {
+  assertSafeTestTarget,
+  TEST_DATABASE,
+  withDatabase,
+} from "./database-url";
 
-process.loadEnvFile(".env");
+// CI injects the variables directly and has no .env file.
+if (existsSync(".env")) process.loadEnvFile(".env");
 
 function requireEnv(name: string): string {
   const value = process.env[name];
-  if (!value) throw new Error(`Missing ${name} in .env`);
+  if (!value) throw new Error(`Missing ${name} (in .env or the environment)`);
   return value;
 }
 
 const directUrl = requireEnv("DIRECT_URL");
-const devProjectRef = requireEnv("SEED_DEV_PROJECT_REF");
+// Optional only for a loopback database: assertSafeTestTarget decides.
+const devProjectRef = process.env.SEED_DEV_PROJECT_REF;
 const caCert = process.env.DATABASE_CA_CERT;
 const ssl = caCert
   ? { ca: caCert, rejectUnauthorized: true }
@@ -44,7 +51,7 @@ async function withClient(
 }
 
 async function main(): Promise<void> {
-  assertDevProject(directUrl, devProjectRef);
+  assertSafeTestTarget(directUrl, devProjectRef);
   const testUrl = withDatabase(directUrl, TEST_DATABASE);
 
   await withClient(directUrl, async (client) => {
