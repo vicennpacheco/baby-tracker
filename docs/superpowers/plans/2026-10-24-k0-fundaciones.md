@@ -151,7 +151,7 @@
 ### Tarea 9: rescatar trabajo archivado
 
 - [x] Recuperar el `.gitignore` de `archive/worktree-chore-gitignore-commit-authorship` (ignora `.claude/*` salvo `launch.json` y `skills/`). La regla de autoría ya está en `CLAUDE.md` §0.3.
-- [ ] **Arreglo pendiente:** `archive/determined-merkle-a87617` contiene `callAction` y el aviso de «conexión perdida». Hoy, si la red cae durante una Server Action, la app muestra la pantalla de error en vez de un aviso. Se reaplica en su propia rama (`fix/dropped-connection-toast`), rebasada sobre `main`, renumerando su decisión.
+- [x] **Arreglo rescatado** (rama `fix/dropped-connection-toast`, decisión 089): `archive/determined-merkle-a87617` contenía `callAction` y el aviso de «conexión perdida». Hoy, si la red cae durante una Server Action, la app muestra la pantalla de error en vez de un aviso. Se reaplica en su propia rama (`fix/dropped-connection-toast`), rebasada sobre `main`, renumerando su decisión.
 - [x] `archive/laughing-keller-bb5a50` (refresco al volver sin conexión) **no se rescata**: `RefreshOnFocus` fue sustituido por `RealtimeSync` (decisión 066), que ya tiene en cuenta la conexión.
 
 ### Estado (2026-10-24)
